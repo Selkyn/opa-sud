@@ -1,0 +1,56 @@
+const { DataTypes } = require('sequelize');
+const sequelize = require('../sequelize');
+const Contact = require('./Contact');
+
+const VetCenter = sequelize.define('VetCenter', {
+    id: {
+        type: DataTypes.INTEGER,
+        primaryKey: true,
+        autoIncrement: true
+    },
+    name: {
+        type: DataTypes.STRING,
+        allowNull: false
+    },
+    email: {
+        type: DataTypes.STRING,
+        allowNull: false,
+        unique: true
+    },
+    adress: {
+        type: DataTypes.STRING,
+        allowNull: true
+    },
+    city: {
+        type: DataTypes.STRING,
+        allowNull: false
+    },
+      department: {
+        type: DataTypes.STRING,
+        allowNull: false
+      },
+      postal: {
+        type: DataTypes.INTEGER,
+        allowNull: false
+      },
+      phone : {
+        type: DataTypes.STRING,
+        allowNull: false
+      },
+      infos: {
+        type: DataTypes.STRING,
+        allowNull: true
+      },
+    contactId: {
+      type: DataTypes.INTEGER,
+      allowNull: true,
+      references: {
+          model: Contact, 
+          key: 'id'       
+      }
+  },
+}, {
+    timestamps: false
+  });
+
+  module.exports = VetCenter;

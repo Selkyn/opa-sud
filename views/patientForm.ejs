@@ -1,0 +1,201 @@
+<%- include('header') %>
+<section>
+    <h2>Ajouter un patient</h2>
+    <div style="display: flex; margin-left: 100px; gap: 100px;">
+        <form action="/patients/add" method="post" style="display: flex; flex-direction: column; width: 500px;">
+            <h3>Informations du patient</h3>
+
+            <label for="name">Nom</label>
+            <input type="text" name="name" id="name" required>
+    
+            <label for="birthday">Date de naissance</label>
+            <input type="date" name="birthday" id="birthday">
+
+            <label for="sex">Sexe</label>
+            <select name="sexId" id="sex">
+                <% sexes.forEach(sex => { %>
+                    <option value="<%= sex.id %>"><%= sex.name %></option>
+                <% }) %>
+            </select>
+
+            <label for="animalType">Type d'animal</label>
+            <select name="animalTypeId" id="animalType" onchange="toggleCustomAnimalType()">
+                <option value="">Sélectionnez un type d'animal</option>
+                <% animalTypes.forEach(animalType => { %>
+                    <option value="<%= animalType.id %>" data-races='<%= JSON.stringify(animalType.races) %>'><%= animalType.name %></option>
+                <% }) %>
+                <option value="other">Autre</option> <!-- Option "Autre" -->
+            </select>
+
+            <!-- Champ caché pour le type d'animal personnalisé -->
+            <div id="customAnimalTypeDiv" style="display: none;">
+                <label for="customAnimalType">Entrez le type d'animal</label>
+                <input type="text" name="customAnimalType" id="customAnimalType">
+                
+                <!-- Champ pour la nouvelle race associée à ce type d'animal -->
+                <label for="customRace">Entrez la race associée</label>
+                <input type="text" name="customRace" id="customRace">
+            </div>
+        
+            <label for="race">Race</label>
+            <select name="raceId" id="race" onchange="toggleCustomRace()">
+                <option value="">Sélectionnez une race</option>
+                <option value="other">Autre</option> <!-- Option "Autre" -->
+            </select>
+
+            <!-- Champ caché pour la race personnalisée -->
+            <div id="customRaceDiv" style="display: none;">
+                <label for="customRaceStandalone">Entrez la race</label>
+                <input type="text" name="customRaceStandalone" id="customRaceStandalone">
+            </div>
+
+            <label for="pathology">Pathologie</label>
+            <input type="text" name="pathology" id="pathology">
+
+            <h3>Informations du client</h3>
+
+            <label for="firstname">Prénom du client</label>
+            <input type="text" name="firstname" id="firstname" required>
+        
+            <label for="lastname">Nom du client</label>
+            <input type="text" name="lastname" id="lastname" required>
+        
+            <label for="email">Email du client</label>
+            <input type="email" name="email" id="email" required>
+        
+            <label for="phone">Téléphone du client</label>
+            <input type="tel" name="phone" id="phone" required>
+        
+            <label for="adress">Adresse du client</label>
+            <input type="text" name="adress" id="adress" required>
+        
+            <label for="city">Ville</label>
+            <input type="text" name="city" id="city" required>
+        
+            <label for="postal">Code postal</label>
+            <input type="text" name="postal" id="postal" required>
+        
+            <label for="department">Département</label>
+            <input type="text" name="department" id="department" required>
+        
+            <label for="clientSex">Sexe du client</label>
+            <select name="clientSexId" id="clientSex">
+                <% sexes.forEach(sex => { %>
+                    <option value="<%= sex.id %>"><%= sex.name %></option>
+                <% }) %>
+            </select>
+
+            <h3>Informations sur le centre vétérinaire</h3>
+
+            <label for="nameVetCenter">Nom du centre</label>
+            <input type="text" name="nameVetCenter" id="nameVetCenter">
+
+            <label for="adressVetCenter">Adresse</label>
+            <input type="text" name="adressVetCenter" id="adressVetCenter">
+
+            <label for="cityVetCenter">Ville</label>
+            <input type="text" name="cityVetCenter" id="cityVetCenter">
+
+            <label for="departmentVetCenter">Département</label>
+            <input type="text" name="departmentVetCenter" id="departmentVetCenter">
+
+            <label for="postalVetCenter">Code postal</label>
+            <input type="text" name="postalVetCenter" id="postalVetCenter">
+
+            <label for="phoneVetCenter">Téléphone</label>
+            <input type="text" name="phoneVetCenter" id="phoneVetCenter">
+
+            <label for="emailVetCenter">Email</label>
+            <input type="email" name="emailVetCenter" id="emailVetCenter">
+
+            
+    
+            <input type="submit" value="Enregistrer">
+        </form>
+
+        <form action="/clients/add" method="post" style="display: flex; flex-direction: column; width: 500px;">
+            <label for="firstname">Nom</label>
+            <input type="text" name="firstname" id="firstname" required>
+    
+            <label for="lastname">Prénom</label>
+            <input type="text" name="lastname" id="lastname">
+
+            <label for="email">Email</label>
+            <input type="email" name="email" id="email">
+
+            <label for="adress">Adresse</label>
+            <input type="text" name="adress" id="adress">
+
+            <label for="city">Ville</label>
+            <input type="text" name="city" id="city">
+
+            <label for="department">Département</label>
+            <input type="text" name="department" id="department">
+
+            <label for="postal">Code postal</label>
+            <input type="text" name="postal" id="postal">
+
+            <label for="phone">Téléphone</label>
+            <input type="tel" name="phone" id="phone">
+    
+            <input type="submit" value="Enregistrer">
+        </form>
+    </div>
+</section>
+<%- include('footer') %>
+
+<script>
+    function updateRaceOptions() {
+        const animalTypeSelect = document.getElementById('animalType');
+        const raceSelect = document.getElementById('race');
+
+        // Réinitialiser la liste des races
+        raceSelect.innerHTML = '<option value="">Sélectionnez une race</option>';
+
+        // Obtenir les races pour le type d'animal sélectionné
+        const selectedOption = animalTypeSelect.options[animalTypeSelect.selectedIndex];
+        const races = selectedOption.getAttribute('data-races');
+
+        // Si des races existent pour le type d'animal sélectionné, les ajouter au select
+        if (races) {
+            const racesArray = JSON.parse(races);
+            racesArray.forEach(race => {
+                const option = document.createElement('option');
+                option.value = race.id;
+                option.textContent = race.name;
+                raceSelect.appendChild(option);
+            });
+
+            // Ajouter l'option "Autre" pour la saisie manuelle de la race
+            const otherOption = document.createElement('option');
+            otherOption.value = 'other';
+            otherOption.textContent = 'Autre';
+            raceSelect.appendChild(otherOption);
+        }
+    }
+
+    function toggleCustomAnimalType() {
+        const animalTypeSelect = document.getElementById('animalType');
+        const customAnimalTypeDiv = document.getElementById('customAnimalTypeDiv');
+
+        if (animalTypeSelect.value === 'other') {
+            customAnimalTypeDiv.style.display = 'block'; // Afficher le champ personnalisé pour le type d'animal et la race associée
+            document.getElementById('race').disabled = true; // Désactiver la sélection de la race si "Autre"
+        } else {
+            customAnimalTypeDiv.style.display = 'none'; // Cacher le champ personnalisé
+            document.getElementById('race').disabled = false; // Activer la sélection de la race si autre type
+            updateRaceOptions(); // Mettre à jour les options de race si un type d'animal est sélectionné
+        }
+    }
+
+    function toggleCustomRace() {
+        const raceSelect = document.getElementById('race');
+        const customRaceDiv = document.getElementById('customRaceDiv');
+
+        if (raceSelect.value === 'other') {
+            customRaceDiv.style.display = 'block'; // Afficher le champ personnalisé pour la race
+        } else {
+            customRaceDiv.style.display = 'none'; // Cacher le champ personnalisé
+        }
+    }
+</script>
