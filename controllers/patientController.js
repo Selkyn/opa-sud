@@ -10,6 +10,7 @@ const PaymentMode = require('../models/PaymentMode');
 const Follow = require('../models/Follow');
 const Client = require('../models/Client');
 const VetCenter = require('../models/VetCenter');
+const Vet = require('../models/Vet');
 
 exports.getPatients = async (req, res) => {
     try {
@@ -63,7 +64,17 @@ exports.getPatients = async (req, res) => {
                             attributes: ['name']
                         }
                     ]
-                } 
+                },
+                // {
+                //     model: VetCenter,
+                //     as: "vetCenter",
+                //     include: [
+                //         {
+                //             model: Vet,
+                //             as: 'vet'
+                //         }
+                //     ]
+                // } 
             ]
         })
 
@@ -90,9 +101,19 @@ exports.createPatientForm = async (req, res) => {
             ]
         });
 
+        const vetCenters = await VetCenter.findAll({
+            include: [
+                        {
+                            model: Vet,
+                            as: 'vets'
+                        }
+                    ]
+        })
+
         res.render('patientForm', {
             sexes,
             animalTypes,
+            vetCenters
         });
     } catch (error) {
         console.error("Erreur lors de la récupération des données pour le formulaire :", error);
@@ -120,6 +141,7 @@ exports.addPatient = async (req, res) => {
                 customAnimalType,
                 customRace, 
                 customRaceStandalone,
+                vetCenterId,
                 nameVetCenter,
                 adressVetCenter,
                 cityVetCenter,
@@ -186,19 +208,25 @@ exports.addPatient = async (req, res) => {
             });
         }
 
-        let vetCenter = await VetCenter.findOne({ where: { email }});
-
-        if (!vetCenter) {
-            vetCenter = await VetCenter.create({
-                name: nameVetCenter,
-                adress: adressVetCenter,
-                city: cityVetCenter,
-                department: departmentVetCenter,
-                postal: postalVetCenter,
-                phone: phoneVetCenter,
-                email: emailVetCenter
-            });
-        } 
+        let vetCenter;
+        if (vetCenterId) {
+            // Si un centre vétérinaire existant est sélectionné, l'utiliser
+            vetCenter = await VetCenter.findByPk(vetCenterId);
+        } else {
+            // Si aucun centre existant n'est sélectionné, créer un nouveau centre
+            vetCenter = await VetCenter.findOne({ where: { email: emailVetCenter } });
+            if (!vetCenter) {
+                vetCenter = await VetCenter.create({
+                    name: nameVetCenter,
+                    adress: adressVetCenter,
+                    city: cityVetCenter,
+                    department: departmentVetCenter,
+                    postal: postalVetCenter,
+                    phone: phoneVetCenter,
+                    email: emailVetCenter
+                });
+            }
+        }
 
         // Créer le patient
         const patient = await Patient.create({
@@ -206,7 +234,7 @@ exports.addPatient = async (req, res) => {
             birthday,
             sexId: selectedSex.id,
             animalTypeId: selectedAnimalType.id,
-            raceId: selectedRace ? selectedRace.id : null,  // Si une race est sélectionnée
+            raceId: selectedRace ? selectedRace.id : null, 
             pathology,
             clientId: client.id,
             vetCenterId: vetCenter.id

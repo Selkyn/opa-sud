@@ -87,64 +87,64 @@
 
             <h3>Informations sur le centre vétérinaire</h3>
 
+            <label for="vetCenter">Centre vétérinaire</label>
+            <select name="vetCenterId" id="vetCenter" onchange="customToggleVetCenter()">
+                <option value="">Sélectionnez un centre vétérinaire</option>
+                <% vetCenters.forEach(vetCenter => { %>
+                    <option value="<%= vetCenter.id %>"><%= vetCenter.name %> à <%= vetCenter.city %></option>
+                <% }) %>
+                <option value="other">Autres</option>
+            </select>
+
             <label for="nameVetCenter">Nom du centre</label>
-            <input type="text" name="nameVetCenter" id="nameVetCenter">
+            <input type="text" name="nameVetCenter" id="nameVetCenter" class="vetCenterClass" disabled>
 
             <label for="adressVetCenter">Adresse</label>
-            <input type="text" name="adressVetCenter" id="adressVetCenter">
+            <input type="text" name="adressVetCenter" id="adressVetCenter" class="vetCenterClass" disabled>
 
             <label for="cityVetCenter">Ville</label>
-            <input type="text" name="cityVetCenter" id="cityVetCenter">
+            <input type="text" name="cityVetCenter" id="cityVetCenter" class="vetCenterClass" disabled>
 
             <label for="departmentVetCenter">Département</label>
-            <input type="text" name="departmentVetCenter" id="departmentVetCenter">
+            <input type="text" name="departmentVetCenter" id="departmentVetCenter" class="vetCenterClass" disabled>
 
             <label for="postalVetCenter">Code postal</label>
-            <input type="text" name="postalVetCenter" id="postalVetCenter">
+            <input type="text" name="postalVetCenter" id="postalVetCenter" class="vetCenterClass" disabled>
 
             <label for="phoneVetCenter">Téléphone</label>
-            <input type="text" name="phoneVetCenter" id="phoneVetCenter">
+            <input type="text" name="phoneVetCenter" id="phoneVetCenter" class="vetCenterClass" disabled>
 
             <label for="emailVetCenter">Email</label>
-            <input type="email" name="emailVetCenter" id="emailVetCenter">
+            <input type="email" name="emailVetCenter" id="emailVetCenter" class="vetCenterClass" disabled>
 
             
     
             <input type="submit" value="Enregistrer">
         </form>
 
-        <form action="/clients/add" method="post" style="display: flex; flex-direction: column; width: 500px;">
-            <label for="firstname">Nom</label>
-            <input type="text" name="firstname" id="firstname" required>
-    
-            <label for="lastname">Prénom</label>
-            <input type="text" name="lastname" id="lastname">
 
-            <label for="email">Email</label>
-            <input type="email" name="email" id="email">
-
-            <label for="adress">Adresse</label>
-            <input type="text" name="adress" id="adress">
-
-            <label for="city">Ville</label>
-            <input type="text" name="city" id="city">
-
-            <label for="department">Département</label>
-            <input type="text" name="department" id="department">
-
-            <label for="postal">Code postal</label>
-            <input type="text" name="postal" id="postal">
-
-            <label for="phone">Téléphone</label>
-            <input type="tel" name="phone" id="phone">
-    
-            <input type="submit" value="Enregistrer">
-        </form>
     </div>
 </section>
 <%- include('footer') %>
 
 <script>
+    function customToggleVetCenter() {
+        const createVetCenterFields = document.getElementsByClassName('vetCenterClass');
+        const vetCenterSelect = document.getElementById('vetCenter');
+
+        // Activer les champs si "Autres" est sélectionné, sinon les désactiver
+        if (vetCenterSelect.value === "other") {
+            for (let field of createVetCenterFields) {
+                field.disabled = false;
+            }
+        } else {
+            for (let field of createVetCenterFields) {
+                field.disabled = true;
+                field.value = ''; 
+            }
+        }
+    }
+
     function updateRaceOptions() {
         const animalTypeSelect = document.getElementById('animalType');
         const raceSelect = document.getElementById('race');
@@ -179,12 +179,12 @@
         const customAnimalTypeDiv = document.getElementById('customAnimalTypeDiv');
 
         if (animalTypeSelect.value === 'other') {
-            customAnimalTypeDiv.style.display = 'block'; // Afficher le champ personnalisé pour le type d'animal et la race associée
-            document.getElementById('race').disabled = true; // Désactiver la sélection de la race si "Autre"
+            customAnimalTypeDiv.style.display = 'block';
+            document.getElementById('race').disabled = true;
         } else {
-            customAnimalTypeDiv.style.display = 'none'; // Cacher le champ personnalisé
-            document.getElementById('race').disabled = false; // Activer la sélection de la race si autre type
-            updateRaceOptions(); // Mettre à jour les options de race si un type d'animal est sélectionné
+            customAnimalTypeDiv.style.display = 'none'; 
+            document.getElementById('race').disabled = false;
+            updateRaceOptions();
         }
     }
 
@@ -193,9 +193,38 @@
         const customRaceDiv = document.getElementById('customRaceDiv');
 
         if (raceSelect.value === 'other') {
-            customRaceDiv.style.display = 'block'; // Afficher le champ personnalisé pour la race
+            customRaceDiv.style.display = 'block'; 
         } else {
-            customRaceDiv.style.display = 'none'; // Cacher le champ personnalisé
+            customRaceDiv.style.display = 'none';
         }
     }
 </script>
+
+
+        <!-- <form action="/clients/add" method="post" style="display: flex; flex-direction: column; width: 500px;">
+            <label for="firstname">Nom</label>
+            <input type="text" name="firstname" id="firstname" required>
+    
+            <label for="lastname">Prénom</label>
+            <input type="text" name="lastname" id="lastname">
+
+            <label for="email">Email</label>
+            <input type="email" name="email" id="email">
+
+            <label for="adress">Adresse</label>
+            <input type="text" name="adress" id="adress">
+
+            <label for="city">Ville</label>
+            <input type="text" name="city" id="city">
+
+            <label for="department">Département</label>
+            <input type="text" name="department" id="department">
+
+            <label for="postal">Code postal</label>
+            <input type="text" name="postal" id="postal">
+
+            <label for="phone">Téléphone</label>
+            <input type="tel" name="phone" id="phone">
+    
+            <input type="submit" value="Enregistrer">
+        </form> -->
