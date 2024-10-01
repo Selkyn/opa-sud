@@ -7,6 +7,7 @@ const app = express();
 //ROUTES
 const loginRoute = require('./routes/login');
 const patientRoute = require('./routes/patient');
+const professionalRoute = require('./routes/professional');
 
 app.set('view engine', 'ejs');
 
@@ -41,5 +42,6 @@ app.get('/', (req, res, next) => {
 //ROUTES USE 
 app.use('/', loginRoute);
 app.use('/patients', patientRoute);
+app.use('/professionals', professionalRoute);
 
 module.exports = app;

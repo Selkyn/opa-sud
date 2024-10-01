@@ -1,0 +1,57 @@
+<%- include('header') %>
+<h2>Professionnels</h2>
+<a href="/patients/form">Ajouter un centre vétérinaire</a>
+<section class="container mt-4">
+    <table border="1" class="table table-striped">
+        <thead class="thead-dark">
+            <tr>
+                <th>Centre vétérinaire</th>
+                <th>Vétérinaire(s)</th>
+                <th>Patient(s)</th>
+                <th>Adresse</th>
+                <th>Téléphone</th>
+                <th>Email</th>
+            </tr>
+        </thead>
+        <tbody>
+            <% professionals.forEach(professional => { %> 
+                <tr>
+                    <!-- Afficher le nom du centre vétérinaire -->
+                    <td><%= professional.name %></td>
+
+                    <!-- Afficher la liste des vétérinaires associés au centre -->
+                    <td>
+                        <% if (professional.vets && professional.vets.length > 0) { %>
+                            <ul>
+                                <% professional.vets.forEach(vet => { %>
+                                    <li>Dr <%= vet.firstname %> <%= vet.lastname %></li>
+                                <% }) %>
+                            </ul>
+                        <% } else { %>
+                            Aucun vétérinaire
+                        <% } %>
+                    </td>
+
+                    <td>
+                        <% if (professional.patients && professional.patients.length > 0) { %>
+                            <ul>
+                                <% professional.patients.forEach(patient => { %>
+                                    <li><%= patient.name %></li>
+                                <% }) %>
+                            </ul>
+                            <% } else { %>
+                                Aucun vétérinaire
+                            <% } %>
+                    </td>
+
+                    <!-- Afficher l'adresse, téléphone, et email du centre vétérinaire -->
+                    <td><%= professional.adress %></td>
+                    <td><%= professional.phone %></td>
+                    <td><%= professional.email %></td>
+                </tr>
+            <% }) %>
+        </tbody>
+    </table>
+</section>
+
+<%- include('footer') %>

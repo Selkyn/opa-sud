@@ -117,7 +117,16 @@
             <label for="emailVetCenter">Email</label>
             <input type="email" name="emailVetCenter" id="emailVetCenter" class="vetCenterClass" disabled>
 
-            
+            <!-- <h3>Informations sur le vétérinaire</h3>
+
+            <select name="vetId" id="vet">
+                <option value="">Sélectionnez un vétérinaire</option>
+                <% vetCenters.forEach(vetCenter => { %>
+                    <% vetCenter.vets.forEach(vet => { %>
+                        <option value="<%= vet.id %>"><%= vet.firstname %> <%= vet.lastname %></option>
+                    <% }) %>
+                <% }) %>
+            </select> -->
     
             <input type="submit" value="Enregistrer">
         </form>
@@ -144,6 +153,22 @@
             }
         }
     }
+
+    function enableVetCenterFields() {
+        const createVetCenterFields = document.getElementsByClassName('vetCenterClass');
+        const vetCenterSelect = document.getElementById('vetCenter');
+
+        // Si "Autres" est sélectionné, activer les champs avant la soumission du formulaire
+        if (vetCenterSelect.value === "other") {
+            for (let field of createVetCenterFields) {
+                field.disabled = false; 
+            }
+        }
+    }
+
+    document.querySelector('form').addEventListener('submit', function(event) {
+        enableVetCenterFields();  // Activer les champs du centre vétérinaire avant l'envoi du formulaire
+    });
 
     function updateRaceOptions() {
         const animalTypeSelect = document.getElementById('animalType');

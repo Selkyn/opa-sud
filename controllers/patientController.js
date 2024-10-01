@@ -105,7 +105,13 @@ exports.createPatientForm = async (req, res) => {
             include: [
                         {
                             model: Vet,
-                            as: 'vets'
+                            as: 'vets',
+                            include: [
+                                {
+                                    model: Sex,
+                                    as: "sex"
+                                }
+                            ]
                         }
                     ]
         })
@@ -148,7 +154,11 @@ exports.addPatient = async (req, res) => {
                 departmentVetCenter,
                 postalVetCenter,
                 phoneVetCenter,
-                emailVetCenter 
+                emailVetCenter ,
+                firstnameVet,
+                lastnameVet,
+                sexIdVet,
+                vetCenterIdVet
             } = req.body;
 
         // Vérifier que le sexe existe
@@ -209,11 +219,19 @@ exports.addPatient = async (req, res) => {
         }
 
         let vetCenter;
-        if (vetCenterId) {
-            // Si un centre vétérinaire existant est sélectionné, l'utiliser
+        if (vetCenterId && vetCenterId !== 'other') {
+            // Si un centre vétérinaire existant est sélectionné, le récupérer
             vetCenter = await VetCenter.findByPk(vetCenterId);
-        } else {
-            // Si aucun centre existant n'est sélectionné, créer un nouveau centre
+            if (!vetCenter) {
+                return res.status(400).json({ error: 'Centre vétérinaire sélectionné introuvable.' });
+            }
+        } else if (vetCenterId === 'other') {
+            // Si "Autres" est sélectionné, créer un nouveau centre vétérinaire
+            if (!nameVetCenter || !emailVetCenter) {
+                return res.status(400).json({ error: 'Les informations du nouveau centre vétérinaire sont incomplètes.' });
+            }
+
+            // Vérifier si le centre vétérinaire existe déjà avec cet email
             vetCenter = await VetCenter.findOne({ where: { email: emailVetCenter } });
             if (!vetCenter) {
                 vetCenter = await VetCenter.create({
@@ -228,6 +246,18 @@ exports.addPatient = async (req, res) => {
             }
         }
 
+        // VET
+        // let vet = await Vet.findOne({ where: { lastname : lastnameVet }});
+
+        // if(!vet) {
+        //     vet = await Vet.create({
+        //         firstname: firstnameVet,
+        //         lastname: lastnameVet,
+        //         sexId: sexIdVet,
+        //         vetCenterId: vetCenter.id
+        //     })
+        // }
+
         // Créer le patient
         const patient = await Patient.create({
             name,
@@ -241,11 +271,16 @@ exports.addPatient = async (req, res) => {
         });
 
 
-
         res.status(200).json({ message: 'Patient créé avec succès' });
     } catch (error) {
         console.error('Erreur lors de la création du patient et du client :', error);
         res.status(400).json({ error: 'Erreur lors de la création du patient et du client' });
     }
 };
+
+// exports.patientDetails = async (req, res) => {
+//     try {
+
+//     }
+// }
 
