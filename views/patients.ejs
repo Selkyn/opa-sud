@@ -17,7 +17,7 @@
         <tbody>
             <% patients.forEach(patient => { %> 
                 <tr>
-                    <td><%= patient.name %></td> 
+                    <td><a href="/patients/<%= patient.id %>"><%= patient.name %></a></td>
                     <td>
                         <% if (patient.client && patient.client.sex && patient.client.sex.name === "male") { %>
                             Mr

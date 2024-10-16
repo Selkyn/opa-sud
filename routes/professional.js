@@ -1,9 +1,11 @@
 const express = require('express');
 const router = express.Router();
 
-const patientCtrl = require('../controllers/professionalController');
+const professionalCtrl = require('../controllers/professionalController');
 
-router.get('/', patientCtrl.getProfessionals);
+router.get('/', professionalCtrl.getProfessionals);
+router.get('/:id', professionalCtrl.professionalDetails);
+
 // router.get('/form', patientCtrl.createPatientForm);
 // router.post('/add', patientCtrl.addPatient);
 
