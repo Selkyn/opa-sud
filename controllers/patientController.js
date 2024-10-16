@@ -11,6 +11,7 @@ const Follow = require('../models/Follow');
 const Client = require('../models/Client');
 const VetCenter = require('../models/VetCenter');
 const Vet = require('../models/Vet');
+const axios = require('axios');
 
 exports.getPatients = async (req, res) => {
     try {
@@ -129,37 +130,42 @@ exports.createPatientForm = async (req, res) => {
 }
 
 exports.addPatient = async (req, res) => {
-    try {
-        const {
-            name,
-            birthday,
-            sexId,
-            animalTypeId,
-            raceId,
-            pathology,
-            firstname,
-            lastname,
-            email,
-            phone,
-            adress,
-            city,
-            postal,
-            department,
-            clientSexId,
-            customAnimalType, // Custom type d'animal
-            customRace, // Custom race associé à customAnimalType
-            customRaceStandalone, // Custom race pour un type d'animal existant
-            vetCenterId,
-            nameVetCenter,
-            adressVetCenter,
-            cityVetCenter,
-            departmentVetCenter,
-            postalVetCenter,
-            phoneVetCenter,
-            emailVetCenter
-        } = req.body;
+    
+    const {
+        name,
+        birthday,
+        sexId,
+        animalTypeId,
+        raceId,
+        pathology,
+        firstname,
+        lastname,
+        email,
+        phone,
+        adress,
+        city,
+        postal,
+        department,
+        clientSexId,
+        customAnimalType, // Custom type d'animal
+        customRace, // Custom race associé à customAnimalType
+        customRaceStandalone, // Custom race pour un type d'animal existant
+        vetCenterId,
+        nameVetCenter,
+        adressVetCenter,
+        cityVetCenter,
+        departmentVetCenter,
+        postalVetCenter,
+        phoneVetCenter,
+        emailVetCenter
+    } = req.body;
 
-        console.log("Données reçues :", req.body);
+    const fullAddress =`${adress}, ${postal} ${city}`;
+    const vetFullAddress =`${adressVetCenter}, ${postalVetCenter} ${cityVetCenter}`;
+    
+    try {
+
+        // console.log("Données reçues :", req.body);
 
         // Vérifier que le sexe existe
         const selectedSex = await Sex.findByPk(sexId);
@@ -239,9 +245,18 @@ exports.addPatient = async (req, res) => {
             }
         }
 
+        const apiKey = process.env.OPENCAGEDATA_API_KEY;
+
+        
+        
+
         // Gestion du client
         let client = await Client.findOne({ where: { email } });
         if (!client) {
+            const geocodeResponse = await axios.get(
+                `https://api.opencagedata.com/geocode/v1/json?q=${encodeURIComponent(fullAddress)}&key=${apiKey}`
+            );
+            const { lat, lng } = geocodeResponse.data.results[0].geometry;
             console.log("Création d'un nouveau client:", firstname, lastname);
             client = await Client.create({
                 firstname,
@@ -252,6 +267,8 @@ exports.addPatient = async (req, res) => {
                 city,
                 postal,
                 department,
+                latitude: lat,
+                longitude: lng,
                 sexId: clientSexId
             });
         }
@@ -270,6 +287,11 @@ exports.addPatient = async (req, res) => {
             // Si vetCenterId est "other" ou vide, créer un centre vétérinaire personnalisé
             console.log("Création d'un centre vétérinaire personnalisé:", nameVetCenter);
 
+            const vetGeocodeResponse = await axios.get(
+                `https://api.opencagedata.com/geocode/v1/json?q=${encodeURIComponent(vetFullAddress)}&key=${apiKey}`
+            );
+            const { lat: vetLat, lng: vetLng } = vetGeocodeResponse.data.results[0].geometry;
+
             // Vérifier si le centre vétérinaire personnalisé existe déjà via email
             vetCenter = await VetCenter.findOne({ where: { email: emailVetCenter } });
             if (!vetCenter) {
@@ -281,7 +303,9 @@ exports.addPatient = async (req, res) => {
                     department: departmentVetCenter,
                     postal: postalVetCenter,
                     phone: phoneVetCenter,
-                    email: emailVetCenter
+                    email: emailVetCenter,
+                    latitude : vetLat,
+                    longitude: vetLng
                 });
             } else {
                 console.log("Centre vétérinaire personnalisé existant trouvé:", vetCenter);

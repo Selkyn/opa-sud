@@ -49,6 +49,14 @@ const Client = sequelize.define('Client', {
             key: 'id'       
         }
     },
+    latitude: {
+      type: DataTypes.FLOAT,
+      allowNull: true // ou false selon le cas
+    },
+    longitude: {
+        type: DataTypes.FLOAT,
+        allowNull: true // ou false selon le cas
+    }
 }, {
     timestamps: false
   });

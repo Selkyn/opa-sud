@@ -1,19 +1,10 @@
+require('dotenv').config();
 const { Sequelize } = require("sequelize");
 
-// connexion à la base de données avec sequelize
-const sequelize = new Sequelize("opa_sud", "root", "", {
-  host: "localhost",
+const sequelize = new Sequelize(process.env.DB_NAME, process.env.DB_USERNAME, process.env.DB_PASSWORD, {
+  host: process.env.DB_HOST,
   dialect: "mysql",
-  logging: false, // Désactive les logs SQL (optionnel)
+  logging: false,
 });
 
-// Tester la connexion à la base de données
-sequelize.authenticate()
-  .then(() => {
-    console.log('Connexion réussie à la base de données.');
-  })
-  .catch(err => {
-    console.error('Impossible de se connecter à la base de données :', err);
-  });
-  
 module.exports = sequelize;

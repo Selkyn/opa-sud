@@ -37,6 +37,14 @@ const VetCenter = sequelize.define('VetCenter', {
         type: DataTypes.STRING,
         allowNull: false
       },
+      latitude: {
+        type: DataTypes.FLOAT,
+        allowNull: true // ou false selon le cas
+      },
+      longitude: {
+          type: DataTypes.FLOAT,
+          allowNull: true // ou false selon le cas
+      },
       infos: {
         type: DataTypes.STRING,
         allowNull: true
