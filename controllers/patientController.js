@@ -13,6 +13,14 @@ const VetCenter = require('../models/VetCenter');
 const Vet = require('../models/Vet');
 const axios = require('axios');
 
+// Fonction pour capitaliser la première lettre de chaque mot
+const capitalizeFirstLetter = (str) => {
+    return str
+        .split(' ')
+        .map(word => word.charAt(0).toUpperCase() + word.slice(1).toLowerCase())
+        .join(' ');
+};
+
 exports.getPatients = async (req, res) => {
     try {
         const patients = await Patient.findAll({
@@ -131,7 +139,7 @@ exports.createPatientForm = async (req, res) => {
 
 exports.addPatient = async (req, res) => {
     
-    const {
+    let {
         name,
         birthday,
         sexId,
@@ -159,6 +167,37 @@ exports.addPatient = async (req, res) => {
         phoneVetCenter,
         emailVetCenter
     } = req.body;
+
+        // Capitalisation des valeurs
+        name = capitalizeFirstLetter(name);
+        firstname = capitalizeFirstLetter(firstname);
+        lastname = capitalizeFirstLetter(lastname);
+        city = capitalizeFirstLetter(city);
+        department = capitalizeFirstLetter(department);
+        
+        if (customRace) {
+            customRace = capitalizeFirstLetter(customRace);
+        }
+        
+        if (customRaceStandalone) {
+            customRaceStandalone = capitalizeFirstLetter(customRaceStandalone);
+        }
+
+        if (customAnimalType) {
+            customAnimalType = capitalizeFirstLetter(customAnimalType);
+        }
+    
+        if (nameVetCenter) {
+            nameVetCenter = capitalizeFirstLetter(nameVetCenter);
+        }
+
+        if (cityVetCenter) {
+            cityVetCenter = capitalizeFirstLetter(cityVetCenter);
+        }
+
+        if (departmentVetCenter) {
+            departmentVetCenter = capitalizeFirstLetter(departmentVetCenter);
+        }
 
     const fullAddress =`${adress}, ${postal} ${city}`;
     const vetFullAddress =`${adressVetCenter}, ${postalVetCenter} ${cityVetCenter}`;
@@ -597,7 +636,6 @@ exports.showEditPatientForm = async (req, res) => {
         });
         const vetCenters = await VetCenter.findAll();
 
-        // Rendre la page avec les données du patient
         res.status(200).json({
             patient,
             sexes,
