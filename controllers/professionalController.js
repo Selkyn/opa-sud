@@ -13,6 +13,8 @@ const capitalizeFirstLetter = (str) => {
         .join(' ');
 };
 
+const apiKey = process.env.OPENCAGEDATA_API_KEY;
+
 exports.getProfessionals = async (req, res) => {
     try {
         const professionals = await VetCenter.findAll({
@@ -81,7 +83,7 @@ exports.professionalDetails = async (req, res) => {
 // }
 
 exports.addProfessional = async (req, res) => {
-    const apiKey = process.env.OPENCAGEDATA_API_KEY;
+    
     try {
         // Récupérer les informations du centre vétérinaire
         let {
@@ -176,7 +178,19 @@ exports.deleteProfessional = async (req, res) => {
 
 exports.editProfessional = async (req, res) => {
     const { id } = req.params;
-    const { name, email, adress, city, postal, department, phone, infos, vets } = req.body;
+    let { name, email, adress, city, postal, department, phone, infos, vets } = req.body;
+
+    name = capitalizeFirstLetter(name);
+    city = capitalizeFirstLetter(city);
+    department = capitalizeFirstLetter(department);
+
+    const fullAddress = `${adress}, ${postal} ${city}`;
+
+    // Utiliser l'API de géolocalisation pour obtenir latitude et longitude
+    const vetGeocodeResponse = await axios.get(
+        `https://api.opencagedata.com/geocode/v1/json?q=${encodeURIComponent(fullAddress)}&key=${apiKey}`
+    );
+    const { lat, lng } = vetGeocodeResponse.data.results[0].geometry;
 
     try {
         // Récupérer le centre vétérinaire
@@ -193,6 +207,8 @@ exports.editProfessional = async (req, res) => {
             city,
             postal,
             department,
+            latitude: lat,
+            longitude: lng,
             phone,
             infos
         });
@@ -201,12 +217,16 @@ exports.editProfessional = async (req, res) => {
         const existingVetIds = []; // Pour garder trace des vétérinaires qui existent encore
 
         for (const vet of vets) {
+
+            const firstnameVet = capitalizeFirstLetter(vet.firstnameVet);
+            const lastnameVet = capitalizeFirstLetter(vet.lastnameVet);
+
             if (vet.id) {
                 // Si le vétérinaire a un ID, il existe déjà, on le met à jour
                 await Vet.update(
                     {
-                        firstname: vet.firstnameVet,
-                        lastname: vet.lastnameVet,
+                        firstname: firstnameVet,
+                        lastname: lastnameVet,
                         email: vet.emailVet,
                         // sexId: vet.sexIdVet
                     },
@@ -216,8 +236,8 @@ exports.editProfessional = async (req, res) => {
             } else {
                 // Sinon, c'est un nouveau vétérinaire, on l'ajoute
                 const newVet = await Vet.create({
-                    firstname: vet.firstnameVet,
-                    lastname: vet.lastnameVet,
+                    firstname: firstnameVet,
+                    lastname: lastnameVet,
                     email: vet.emailVet,
                     // sexId: vet.sexIdVet,
                     vetCenterId: vetCenter.id // Associe le vétérinaire au centre vétérinaire

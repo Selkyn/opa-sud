@@ -14,6 +14,7 @@ const Follow = require('./Follow');
 const Race = require('./Race');
 const User = require('./User');
 const Role = require('./Role');
+const Limb = require('./Limb');
 
 
 // Fonction pour définir toutes les associations
@@ -186,6 +187,20 @@ const setupAssociations = () => {
     Role.hasMany(User, {
         foreignKey: 'roleId',
         as: 'users'
+    });
+
+    //ASSOCIATION limb
+    Patient.belongsToMany(Limb, {
+        through: 'PatientLimb',
+        foreignKey: 'patientId',
+        timestamps: false
+    });
+    
+    // Association côté Limb
+    Limb.belongsToMany(Patient, {
+        through: 'PatientLimb',
+        foreignKey: 'limbId',
+        timestamps: false
     });
 };
 

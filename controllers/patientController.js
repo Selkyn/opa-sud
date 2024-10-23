@@ -12,6 +12,7 @@ const Client = require('../models/Client');
 const VetCenter = require('../models/VetCenter');
 const Vet = require('../models/Vet');
 const axios = require('axios');
+const Limb = require('../models/Limb');
 
 // Fonction pour capitaliser la première lettre de chaque mot
 const capitalizeFirstLetter = (str) => {
@@ -126,10 +127,13 @@ exports.createPatientForm = async (req, res) => {
                     ]
         })
 
+        const limbs = await Limb.findAll();
+
         res.status(200).json({
             sexes,
             animalTypes,
-            vetCenters
+            vetCenters,
+            limbs
         });
     } catch (error) {
         console.error("Erreur lors de la récupération des données pour le formulaire :", error);
@@ -146,6 +150,7 @@ exports.addPatient = async (req, res) => {
         animalTypeId,
         raceId,
         pathology,
+        limbs,
         firstname,
         lastname,
         email,
@@ -366,6 +371,13 @@ exports.addPatient = async (req, res) => {
         });
         console.log("Patient créé avec succès :", patient);
 
+        if (limbs && limbs.length > 0) {
+            const foundLimbs = await Limb.findAll({
+                where: { id: limbs },  // Utilisation directe de `limbs` provenant de `req.body`
+            });
+            await patient.addLimbs(foundLimbs);  // Ajouter les membres au patient
+        }
+
         res.status(200).json({ message: 'Patient créé avec succès' });
     } catch (error) {
         console.error('Erreur lors de la création du patient et du client :', error);
@@ -406,6 +418,12 @@ exports.patientDetails = async (req, res) => {
                 {
                     model: Race,
                     as: 'race'
+                },
+                {
+                    model: Limb,
+                    through: {
+                        attributes: [],
+                    }
                 },
                 {
                     model: Payment,
