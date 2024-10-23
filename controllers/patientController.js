@@ -22,6 +22,24 @@ const capitalizeFirstLetter = (str) => {
         .join(' ');
 };
 
+const apiKey = process.env.OPENCAGEDATA_API_KEY;
+
+const makeCoord = async (adress, postal, city) => {
+    const fullAddress = `${adress}, ${postal} ${city}`;
+
+    try {
+        // Appel à l'API OpenCageData pour obtenir les coordonnées
+        const geocodeResponse = await axios.get(`https://api.opencagedata.com/geocode/v1/json?q=${encodeURIComponent(fullAddress)}&key=${apiKey}`);
+        
+        const { lat, lng } = geocodeResponse.data.results[0].geometry;
+
+        return { lat, lng };
+    } catch (error) {
+        console.error('Erreur lors de la récupération des coordonnées :', error);
+        throw new Error('Impossible de récupérer les coordonnées');
+    }
+};
+
 exports.getPatients = async (req, res) => {
     try {
         const patients = await Patient.findAll({
@@ -173,6 +191,7 @@ exports.addPatient = async (req, res) => {
         emailVetCenter
     } = req.body;
 
+
         // Capitalisation des valeurs
         name = capitalizeFirstLetter(name);
         firstname = capitalizeFirstLetter(firstname);
@@ -289,7 +308,7 @@ exports.addPatient = async (req, res) => {
             }
         }
 
-        const apiKey = process.env.OPENCAGEDATA_API_KEY;
+        
 
         
         
@@ -297,10 +316,7 @@ exports.addPatient = async (req, res) => {
         // Gestion du client
         let client = await Client.findOne({ where: { email } });
         if (!client) {
-            const geocodeResponse = await axios.get(
-                `https://api.opencagedata.com/geocode/v1/json?q=${encodeURIComponent(fullAddress)}&key=${apiKey}`
-            );
-            const { lat, lng } = geocodeResponse.data.results[0].geometry;
+            const { lat, lng } = await makeCoord(adress, postal, city);
             console.log("Création d'un nouveau client:", firstname, lastname);
             client = await Client.create({
                 firstname,
@@ -331,10 +347,7 @@ exports.addPatient = async (req, res) => {
             // Si vetCenterId est "other" ou vide, créer un centre vétérinaire personnalisé
             console.log("Création d'un centre vétérinaire personnalisé:", nameVetCenter);
 
-            const vetGeocodeResponse = await axios.get(
-                `https://api.opencagedata.com/geocode/v1/json?q=${encodeURIComponent(vetFullAddress)}&key=${apiKey}`
-            );
-            const { lat: vetLat, lng: vetLng } = vetGeocodeResponse.data.results[0].geometry;
+            const { lat: vetLat, lng: vetLng } = await makeCoord(adress, postal, city);
 
             // Vérifier si le centre vétérinaire personnalisé existe déjà via email
             vetCenter = await VetCenter.findOne({ where: { email: emailVetCenter } });
@@ -367,15 +380,16 @@ exports.addPatient = async (req, res) => {
             raceId: selectedRace ? selectedRace.id : null,
             pathology,
             clientId: client.id,
-            vetCenterId: vetCenter ? vetCenter.id : null
+            vetCenterId: vetCenter ? vetCenter.id : null,
+            situationId : 1
         });
         console.log("Patient créé avec succès :", patient);
 
         if (limbs && limbs.length > 0) {
             const foundLimbs = await Limb.findAll({
-                where: { id: limbs },  // Utilisation directe de `limbs` provenant de `req.body`
+                where: { id: limbs },
             });
-            await patient.addLimbs(foundLimbs);  // Ajouter les membres au patient
+            await patient.addLimbs(foundLimbs);
         }
 
         res.status(200).json({ message: 'Patient créé avec succès' });
@@ -472,14 +486,15 @@ exports.patientDetails = async (req, res) => {
 
 exports.editPatient = async (req, res) => {
     try {
-        const patientId = req.params.id; // Récupération de l'ID du patient à partir des paramètres de l'URL
-        const {
+        const patientId = req.params.id; // Récupération de l'ID du patient
+        let {
             name,
             birthday,
             sexId,
             animalTypeId,
             raceId,
             pathology,
+            limbs,
             firstname,
             lastname,
             email,
@@ -489,9 +504,9 @@ exports.editPatient = async (req, res) => {
             postal,
             department,
             clientSexId,
-            customAnimalType, // Custom type d'animal
-            customRace, // Custom race associé à customAnimalType
-            customRaceStandalone, // Custom race pour un type d'animal existant
+            customAnimalType, 
+            customRace,
+            customRaceStandalone,
             vetCenterId,
             nameVetCenter,
             adressVetCenter,
@@ -502,129 +517,140 @@ exports.editPatient = async (req, res) => {
             emailVetCenter
         } = req.body;
 
+        // Capitalisation des valeurs
+        name = capitalizeFirstLetter(name);
+        firstname = capitalizeFirstLetter(firstname);
+        lastname = capitalizeFirstLetter(lastname);
+        city = capitalizeFirstLetter(city);
+        department = capitalizeFirstLetter(department);
+
+        if (customRace) customRace = capitalizeFirstLetter(customRace);
+        if (customRaceStandalone) customRaceStandalone = capitalizeFirstLetter(customRaceStandalone);
+        if (customAnimalType) customAnimalType = capitalizeFirstLetter(customAnimalType);
+        if (nameVetCenter) nameVetCenter = capitalizeFirstLetter(nameVetCenter);
+        if (cityVetCenter) cityVetCenter = capitalizeFirstLetter(cityVetCenter);
+        if (departmentVetCenter) departmentVetCenter = capitalizeFirstLetter(departmentVetCenter);
+
+        const fullAddress = `${adress}, ${postal} ${city}`;
+        const vetFullAddress = `${adressVetCenter}, ${postalVetCenter} ${cityVetCenter}`;
+
         console.log("Données reçues pour édition :", req.body);
 
         // Trouver le patient existant
-        const patient = await Patient.findByPk(patientId);
-        if (!patient) {
-            return res.status(404).json({ error: 'Patient non trouvé' });
-        }
+        const patient = await Patient.findByPk(patientId, {
+            include: [Limb]
+        });
+        if (!patient) return res.status(404).json({ error: 'Patient non trouvé' });
 
         // Vérifier que le sexe existe
         const selectedSex = await Sex.findByPk(sexId);
-        if (!selectedSex) {
-            return res.status(400).json({ error: 'Sexe non trouvé' });
-        }
+        if (!selectedSex) return res.status(400).json({ error: 'Sexe non trouvé' });
 
         let selectedAnimalType = null;
         let selectedRace = null;
 
+        if (limbs) {
+            const newLimbInstances = await Limb.findAll({
+                where: { id: limbs }
+            });
+        
+            if (newLimbInstances.length !== limbs.length) {
+                return res.status(400).json({ error: 'Certains limbs envoyés sont invalides.' });
+            }
+        
+            // Remplace tous les limbs associés au patient par les nouveaux
+            await patient.setLimbs(newLimbInstances);
+        }
+
+        // if(limbs) {
+        //     const existingLimbs = await patient.getLimbs();
+
+        //     const existingLimbIds = existingLimbs.map((limb) => limb.id)
+
+        //     const newLimbs = limbs.filter((id) => !existingLimbIds.includes(id));
+
+        //     const removedLimbs = existingLimbIds.filter((id) => !limbs.includes(id));
+
+        //     if(newLimbs.length > 0) {
+        //         const newLimbInstances = await Limb.findAll({
+        //             where: { id: newLimbs},
+        //         });
+        //         await patient.addLimbs(newLimbInstances);
+        //     }
+
+        //     if (removedLimbs.length > 0) {
+        //         const removedLimbInstances = await Limb.findAll({
+        //           where: { id: removedLimbs },
+        //         });
+        //         await patient.removeLimbs(removedLimbInstances);
+        //       }
+        // }
+
         // Gérer le type d'animal
         if (!animalTypeId && customAnimalType) {
-            // Gestion du type d'animal personnalisé
-            selectedAnimalType = await AnimalType.findOne({ where: { name: customAnimalType.trim() } });
+            selectedAnimalType = await AnimalType.findOrCreate({
+                where: { name: customAnimalType.trim() }
+            });
 
-            if (!selectedAnimalType) {
-                selectedAnimalType = await AnimalType.create({ name: customAnimalType.trim() });
-            }
-
-            // Gérer la race personnalisée associée au type d'animal personnalisé
             if (customRace) {
-                selectedRace = await Race.findOne({
+                selectedRace = await Race.findOrCreate({
                     where: { name: customRace.trim(), animalTypeId: selectedAnimalType.id }
                 });
-                if (!selectedRace) {
-                    selectedRace = await Race.create({ name: customRace.trim(), animalTypeId: selectedAnimalType.id });
-                }
             }
         } else {
-            // Si un type d'animal existant est sélectionné
             selectedAnimalType = await AnimalType.findByPk(animalTypeId);
-            if (!selectedAnimalType) {
-                return res.status(400).json({ error: 'Type d\'animal non trouvé' });
-            }
+            if (!selectedAnimalType) return res.status(400).json({ error: 'Type d\'animal non trouvé' });
 
-            // Gérer la race, que ce soit une race existante ou une race personnalisée pour un type d'animal existant
             if (!raceId && customRaceStandalone) {
-                selectedRace = await Race.findOne({
+                selectedRace = await Race.findOrCreate({
                     where: { name: customRaceStandalone.trim(), animalTypeId: selectedAnimalType.id }
                 });
-                if (!selectedRace) {
-                    selectedRace = await Race.create({ name: customRaceStandalone.trim(), animalTypeId: selectedAnimalType.id });
-                }
             } else if (raceId) {
                 selectedRace = await Race.findOne({
                     where: { id: raceId, animalTypeId: selectedAnimalType.id }
                 });
-                if (!selectedRace) {
-                    return res.status(400).json({ error: 'Race non trouvée pour ce type d\'animal' });
-                }
+                if (!selectedRace) return res.status(400).json({ error: 'Race non trouvée pour ce type d\'animal' });
             }
         }
 
         // Gérer le client existant ou à mettre à jour
         let client = await Client.findByPk(patient.clientId);
+        const { lat, lng } = await makeCoord(adress, postal, city);
         if (!client) {
-            // Si aucun client n'est trouvé pour ce patient, en créer un
+
             client = await Client.create({
-                firstname,
-                lastname,
-                email,
-                phone,
-                adress,
-                city,
-                postal,
-                department,
-                sexId: clientSexId
+                firstname, lastname, email, phone, adress, city, postal, department,
+                latitude: lat, longitude: lng, sexId: clientSexId
             });
         } else {
-            // Mettre à jour le client existant
-            client.firstname = firstname || client.firstname;
-            client.lastname = lastname || client.lastname;
-            client.email = email || client.email;
-            client.phone = phone || client.phone;
-            client.adress = adress || client.adress;
-            client.city = city || client.city;
-            client.postal = postal || client.postal;
-            client.department = department || client.department;
-            client.sexId = clientSexId || client.sexId;
-            await client.save(); // Sauvegarder les modifications du client
+            await client.update({
+                firstname, lastname, email, phone, adress, city, postal, department, sexId: clientSexId,
+                latitude: lat, longitude: lng
+            });
         }
 
         // Gérer le centre vétérinaire existant ou personnalisé
         let vetCenter;
         if (vetCenterId && vetCenterId !== 'other') {
             vetCenter = await VetCenter.findByPk(vetCenterId);
-            if (!vetCenter) {
-                return res.status(400).json({ error: 'Centre vétérinaire non trouvé' });
-            }
+            if (!vetCenter) return res.status(400).json({ error: 'Centre vétérinaire non trouvé' });
         } else if (vetCenterId === 'other' || !vetCenterId) {
-            // Centre vétérinaire personnalisé
-            vetCenter = await VetCenter.findOne({ where: { email: emailVetCenter } });
-            if (!vetCenter) {
-                vetCenter = await VetCenter.create({
-                    name: nameVetCenter,
-                    adress: adressVetCenter,
-                    city: cityVetCenter,
-                    department: departmentVetCenter,
-                    postal: postalVetCenter,
-                    phone: phoneVetCenter,
-                    email: emailVetCenter
-                });
-            }
+            vetCenter = await VetCenter.findOrCreate({
+                where: { email: emailVetCenter },
+                defaults: {
+                    name: nameVetCenter, adress: adressVetCenter, city: cityVetCenter,
+                    department: departmentVetCenter, postal: postalVetCenter,
+                    phone: phoneVetCenter, email: emailVetCenter
+                }
+            });
         }
 
-        // Mettre à jour les informations du patient
-        patient.name = name || patient.name;
-        patient.birthday = birthday || patient.birthday;
-        patient.sexId = selectedSex.id;
-        patient.animalTypeId = selectedAnimalType.id;
-        patient.raceId = selectedRace ? selectedRace.id : patient.raceId;
-        patient.pathology = pathology || patient.pathology;
-        patient.clientId = client.id;
-        patient.vetCenterId = vetCenter ? vetCenter.id : patient.vetCenterId;
-
-        await patient.save(); // Sauvegarder les modifications du patient
+        await patient.update({
+            name, birthday, sexId: selectedSex.id,
+            animalTypeId: selectedAnimalType.id,
+            raceId: selectedRace ? selectedRace.id : patient.raceId,
+            pathology, clientId: client.id, vetCenterId: vetCenter ? vetCenter.id : patient.vetCenterId
+        });
 
         console.log("Patient mis à jour avec succès :", patient);
         res.status(200).json({ message: 'Patient mis à jour avec succès' });
@@ -633,6 +659,7 @@ exports.editPatient = async (req, res) => {
         res.status(500).json({ error: 'Erreur lors de la mise à jour du patient' });
     }
 };
+
 
 exports.showEditPatientForm = async (req, res) => {
     try {
@@ -680,4 +707,52 @@ exports.deletePatient = async (req, res) => {
       res.status(400).json({ error });
     }
 }
+
+// exports.getPayment = async (req, res) => {
+//     try {
+//         const payment = await Payment.findAll({
+//             include:{
+//                 model:
+//             }
+//         })
+//     }
+// }
+
+exports.getSituation = async (req, res) => {
+    try {
+        const situation = await Situation.findAll();
+
+        res.status(200).json(situation)
+    } catch (error) {
+        console.error("Erreur lors de la récupération des situations")
+    }
+}
+
+exports.updatePatientSituation = async (req, res) => {
+    const patientId = req.params.id; // Récupère l'ID du patient à partir de l'URL
+    const { situationId } = req.body; // Récupère l'ID de la situation depuis le body de la requête
+
+    try {
+        // Trouve le patient par son ID
+        const patient = await Patient.findByPk(patientId);
+        if (!patient) {
+            return res.status(404).json({ message: 'Patient non trouvé.' });
+        }
+
+        // Trouve la situation par son ID
+        const situation = await Situation.findByPk(situationId);
+        if (!situation) {
+            return res.status(400).json({ message: 'Situation non trouvée.' });
+        }
+
+        // Met à jour la situation du patient
+        patient.situationId = situationId;
+        await patient.save();
+
+        res.status(200).json({ message: 'Situation mise à jour avec succès.' });
+    } catch (error) {
+        console.error('Erreur lors de la mise à jour de la situation :', error);
+        res.status(500).json({ message: 'Erreur lors de la mise à jour de la situation.' });
+    }
+};
 
