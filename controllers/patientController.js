@@ -370,6 +370,11 @@ exports.addPatient = async (req, res) => {
         }
         console.log("Centre vétérinaire trouvé ou créé:", vetCenter);
 
+        const defaultPayment = await Payment.create({
+            paymentTypeId : 1,
+            paymentModeId : 1
+        })
+
         // Créer le patient
         console.log("Création du patient...");
         const patient = await Patient.create({
@@ -381,7 +386,8 @@ exports.addPatient = async (req, res) => {
             pathology,
             clientId: client.id,
             vetCenterId: vetCenter ? vetCenter.id : null,
-            situationId : 1
+            statusId : 1,
+            paymentId : defaultPayment.id
         });
         console.log("Patient créé avec succès :", patient);
 
@@ -718,19 +724,19 @@ exports.deletePatient = async (req, res) => {
 //     }
 // }
 
-exports.getSituation = async (req, res) => {
+exports.getStatus = async (req, res) => {
     try {
-        const situation = await Situation.findAll();
+        const status = await Status.findAll();
 
-        res.status(200).json(situation)
+        res.status(200).json(status)
     } catch (error) {
-        console.error("Erreur lors de la récupération des situations")
+        console.error("Erreur lors de la récupération des status")
     }
 }
 
-exports.updatePatientSituation = async (req, res) => {
-    const patientId = req.params.id; // Récupère l'ID du patient à partir de l'URL
-    const { situationId } = req.body; // Récupère l'ID de la situation depuis le body de la requête
+exports.updatePatientStatus = async (req, res) => {
+    const patientId = req.params.id; 
+    const { statusId } = req.body;
 
     try {
         // Trouve le patient par son ID
@@ -739,19 +745,19 @@ exports.updatePatientSituation = async (req, res) => {
             return res.status(404).json({ message: 'Patient non trouvé.' });
         }
 
-        // Trouve la situation par son ID
-        const situation = await Situation.findByPk(situationId);
-        if (!situation) {
-            return res.status(400).json({ message: 'Situation non trouvée.' });
+        // Trouve la status par son ID
+        const status = await Status.findByPk(statusId);
+        if (!status) {
+            return res.status(400).json({ message: 'status non trouvée.' });
         }
 
         // Met à jour la situation du patient
-        patient.situationId = situationId;
+        patient.statusId = statusId;
         await patient.save();
 
-        res.status(200).json({ message: 'Situation mise à jour avec succès.' });
+        res.status(200).json({ message: 'status mise à jour avec succès.' });
     } catch (error) {
-        console.error('Erreur lors de la mise à jour de la situation :', error);
+        console.error('Erreur lors de la mise à jour de la status :', error);
         res.status(500).json({ message: 'Erreur lors de la mise à jour de la situation.' });
     }
 };
