@@ -15,9 +15,9 @@ const capitalizeFirstLetter = (str) => {
 
 const apiKey = process.env.OPENCAGEDATA_API_KEY;
 
-exports.getProfessionals = async (req, res) => {
+exports.getVetCenters = async (req, res) => {
     try {
-        const professionals = await VetCenter.findAll({
+        const vetCenters = await VetCenter.findAll({
             include: [
                 {
                     model: Patient,
@@ -34,14 +34,14 @@ exports.getProfessionals = async (req, res) => {
             ]
         })
 
-        res.status(200).json(professionals)
+        res.status(200).json(vetCenters)
     } catch (error) {
         console.error("Erreur lors de la récupération des professionels :", error);
         res.status(500).json({ error: "Erreur lors de la récupération des professionels" });
     }
 }
 
-exports.professionalDetails = async (req, res) => {
+exports.vetCenterDetails = async (req, res) => {
     try {
         const vetCenterId = req.params.id;
 
@@ -70,7 +70,7 @@ exports.professionalDetails = async (req, res) => {
 }
 
 
-// exports.createProfessionalsForm = async (req, res) => {
+// exports.createvetCentersForm = async (req, res) => {
 //     try {
 //         const sexes = await Sex.findAll();
 //         console.log(sexes)
@@ -82,7 +82,7 @@ exports.professionalDetails = async (req, res) => {
 //     }
 // }
 
-exports.addProfessional = async (req, res) => {
+exports.addVetCenter = async (req, res) => {
     
     try {
         // Récupérer les informations du centre vétérinaire
@@ -161,13 +161,13 @@ exports.addProfessional = async (req, res) => {
     }
 };
 
-exports.deleteProfessional = async (req, res) => {
+exports.deleteVetCenter = async (req, res) => {
     try {
-        const professionalId = req.params.id;
+        const vetCenterId = req.params.id;
 
-        const professional = await VetCenter.findByPk(professionalId);
+        const vetCenter = await VetCenter.findByPk(vetCenterId);
 
-        await professional.destroy();
+        await vetCenter.destroy();
 
         res.status(200).json({ message: "Centre vétérinaire supprimé avec succès" });
     } catch (error) {
@@ -176,7 +176,7 @@ exports.deleteProfessional = async (req, res) => {
     }
 }
 
-exports.editProfessional = async (req, res) => {
+exports.editVetCenter = async (req, res) => {
     const { id } = req.params;
     let { name, email, adress, city, postal, department, phone, infos, vets } = req.body;
 

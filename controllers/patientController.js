@@ -163,7 +163,8 @@ exports.addPatient = async (req, res) => {
     
     let {
         name,
-        birthday,
+        birthYear,
+        weight,
         sexId,
         animalTypeId,
         raceId,
@@ -379,7 +380,8 @@ exports.addPatient = async (req, res) => {
         console.log("Création du patient...");
         const patient = await Patient.create({
             name,
-            birthday,
+            birthYear,
+            weight,
             sexId: selectedSex.id,
             animalTypeId: selectedAnimalType.id,
             raceId: selectedRace ? selectedRace.id : null,
@@ -495,7 +497,8 @@ exports.editPatient = async (req, res) => {
         const patientId = req.params.id; // Récupération de l'ID du patient
         let {
             name,
-            birthday,
+            birthYear,
+            weight,
             sexId,
             animalTypeId,
             raceId,
@@ -652,7 +655,7 @@ exports.editPatient = async (req, res) => {
         }
 
         await patient.update({
-            name, birthday, sexId: selectedSex.id,
+            name, birthYear, sexId: selectedSex.id, weight,
             animalTypeId: selectedAnimalType.id,
             raceId: selectedRace ? selectedRace.id : patient.raceId,
             pathology, clientId: client.id, vetCenterId: vetCenter ? vetCenter.id : patient.vetCenterId
@@ -744,7 +747,7 @@ exports.updatePatientStatus = async (req, res) => {
         if (!patient) {
             return res.status(404).json({ message: 'Patient non trouvé.' });
         }
-
+z
         // Trouve la status par son ID
         const status = await Status.findByPk(statusId);
         if (!status) {

@@ -19,9 +19,13 @@ const Patient = sequelize.define('Patient', {
         type: DataTypes.STRING,
         allowNull: false
     },
-    birthday: {
-        type: DataTypes.DATE,
-        allowNull: true
+    birthYear: {
+        type: DataTypes.INTEGER,
+        allowNull: true,
+        validate: {
+            min: 1900,
+            max: new Date().getFullYear()
+        }
     },
     weight: {
         type: DataTypes.INTEGER,

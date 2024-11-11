@@ -7,7 +7,7 @@ const app = express();
 //ROUTES
 const loginRoute = require('./routes/login');
 const patientRoute = require('./routes/patient');
-const professionalRoute = require('./routes/professional');
+const vetCenterRoute = require('./routes/vetCenter');
 const paymentTypeRoute = require('./routes/paymentType');
 const paymentModeRoute = require('./routes/paymentMode');
 const paymentRoute = require('./routes/payment');
@@ -46,7 +46,7 @@ app.get('/', (req, res, next) => {
 //ROUTES USE 
 app.use('/', loginRoute);
 app.use('/patients', patientRoute);
-app.use('/professionals', professionalRoute);
+app.use('/vet-centers', vetCenterRoute);
 app.use('/paymentTypes', paymentTypeRoute);
 app.use('/paymentModes', paymentModeRoute);
 app.use('/payment', paymentRoute);
