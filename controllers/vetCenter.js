@@ -134,18 +134,18 @@ exports.addVetCenter = async (req, res) => {
         // Boucler sur chaque vétérinaire dans le tableau 'vets' et les ajouter à la base de données
         for (const vet of vets) {
             // Vérification des champs de vétérinaire
-            const firstnameVet = vet.firstnameVet ? capitalizeFirstLetter(vet.firstnameVet) : null;
-            const lastnameVet = vet.lastnameVet ? capitalizeFirstLetter(vet.lastnameVet) : null;
-            const emailVet = vet.emailVet ? vet.emailVet : null;
+            const firstname = vet.firstname ? capitalizeFirstLetter(vet.firstname) : null;
+            const lastname = vet.lastname ? capitalizeFirstLetter(vet.lastname) : null;
+            const email = vet.email ? vet.email : null;
             // const sexIdVet = vet.sexIdVet ? vet.sexIdVet : null;
 
             // Vérifier que les informations minimales du vétérinaire sont présentes
-            if (firstnameVet && lastnameVet && emailVet) {
-                console.log("Ajout du vétérinaire :", firstnameVet, lastnameVet, emailVet);
+            if (firstname && lastname) {
+                console.log("Ajout du vétérinaire :", firstname, lastname, email);
                 await Vet.create({
-                    firstname: firstnameVet,
-                    lastname: lastnameVet,
-                    email: emailVet,
+                    firstname,
+                    lastname,
+                    email,
                     // sexId: sexIdVet,
                     vetCenterId: newVetCenter.id
                 });

@@ -8,6 +8,7 @@ const Sex = require('./Sex');
 const VetCenter = require('./VetCenter');
 const AnimalType = require('./AnimalType');
 const Race = require('./Race');
+const OsteoCenter = require('./OsteoCenter');
 
 const Patient = sequelize.define('Patient', {
     id: {
@@ -80,6 +81,14 @@ const Patient = sequelize.define('Patient', {
         allowNull: true,
         references: {
             model: VetCenter, 
+            key: 'id'       
+        }
+    },
+    osteoCenterId: {
+        type: DataTypes.INTEGER,
+        allowNull: true,
+        references: {
+            model: OsteoCenter, 
             key: 'id'       
         }
     },

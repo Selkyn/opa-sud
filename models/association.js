@@ -14,7 +14,9 @@ const Follow = require('./Follow');
 const Race = require('./Race');
 const User = require('./User');
 const Role = require('./Role');
-const Limb = require('./Limb');
+const Limb = require('./Limb');;
+const Osteo = require('./Osteo');
+const OsteoCenter= require('./OsteoCenter');
 
 
 // Fonction pour définir toutes les associations
@@ -77,6 +79,16 @@ const setupAssociations = () => {
     });
     VetCenter.hasMany(Patient, {
         foreignKey: 'vetCenterId',
+        as: 'patients'
+    });
+
+    // Association Patient <-> OsteoCenter
+    Patient.belongsTo(OsteoCenter, {
+        foreignKey: 'osteoCenterId',
+        as: 'osteoCenter'
+    });
+    OsteoCenter.hasMany(Patient, {
+        foreignKey: 'osteoCenterId',
         as: 'patients'
     });
 
@@ -167,6 +179,35 @@ const setupAssociations = () => {
     Sex.hasMany(Vet, {
         foreignKey: 'sexId',
         as: 'vets'
+    });
+
+    //ASSOCIATION OSTEOCENTER
+    OsteoCenter.belongsTo(Contact, {
+        foreignKey: 'contactId',
+        as: 'contact'
+    });
+    Contact.hasMany(OsteoCenter, {
+        foreignKey: 'contactId',
+        as: 'osteoCenters'
+    });
+
+    //ASSOCIATION OSTEO
+    Osteo.belongsTo(OsteoCenter, {
+        foreignKey: 'osteoCenterId',
+        as: 'osteoCenter'
+    });
+    OsteoCenter.hasMany(Osteo, {
+        foreignKey: 'osteoCenterId',
+        as: 'osteos'
+    });
+
+    Osteo.belongsTo(Sex, {
+        foreignKey: 'sexId',
+        as: 'sex'
+    });
+    Sex.hasMany(Osteo, {
+        foreignKey: 'sexId',
+        as: 'osteos'
     });
 
     //ASSOCIATION CLIENT
