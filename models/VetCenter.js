@@ -27,7 +27,7 @@ const VetCenter = sequelize.define('VetCenter', {
     },
       department: {
         type: DataTypes.STRING,
-        allowNull: false
+        allowNull: true
       },
       postal: {
         type: DataTypes.INTEGER,
@@ -35,15 +35,15 @@ const VetCenter = sequelize.define('VetCenter', {
       },
       phone : {
         type: DataTypes.STRING,
-        allowNull: false
+        allowNull: true
       },
       latitude: {
         type: DataTypes.FLOAT,
-        allowNull: true // ou false selon le cas
+        allowNull: true 
       },
       longitude: {
           type: DataTypes.FLOAT,
-          allowNull: true // ou false selon le cas
+          allowNull: true 
       },
       infos: {
         type: DataTypes.STRING,

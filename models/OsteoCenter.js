@@ -23,19 +23,19 @@ const OsteoCenter = sequelize.define('OsteoCenter', {
     },
     city: {
         type: DataTypes.STRING,
-        allowNull: false
+        allowNull: true
     },
       department: {
         type: DataTypes.STRING,
-        allowNull: false
+        allowNull: true
       },
       postal: {
         type: DataTypes.INTEGER,
-        allowNull: false
+        allowNull: true
       },
       phone : {
         type: DataTypes.STRING,
-        allowNull: false
+        allowNull: true
       },
       latitude: {
         type: DataTypes.FLOAT,

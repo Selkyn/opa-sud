@@ -17,6 +17,15 @@ const Vet = sequelize.define('Vet', {
         type: DataTypes.STRING,
         allowNull: false
     },
+    email: {
+        type: DataTypes.STRING,
+        allowNull: true,
+        unique: true
+    },
+    phone : {
+        type: DataTypes.STRING,
+        allowNull: true
+      },
     sexId: {
         type: DataTypes.INTEGER,
         allowNull: true,

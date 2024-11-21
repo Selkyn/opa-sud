@@ -13,6 +13,8 @@ const VetCenter = require('../models/VetCenter');
 const Vet = require('../models/Vet');
 const axios = require('axios');
 const Limb = require('../models/Limb');
+const OsteoCenter = require('../models/OsteoCenter');
+const Osteo = require('../models/Osteo');
 
 // Fonction pour capitaliser la première lettre de chaque mot
 const capitalizeFirstLetter = (str) => {
@@ -64,7 +66,7 @@ exports.getPatients = async (req, res) => {
                         {
                             model: Race,
                             as: 'races',
-                            attributes: ["name"]
+                            attributes: ['id', "name"]
                         }
                     ]
                 },
@@ -130,11 +132,27 @@ exports.createPatientForm = async (req, res) => {
             ]
         });
 
+       const races = await Race.findAll()
         const vetCenters = await VetCenter.findAll({
             include: [
                         {
                             model: Vet,
                             as: 'vets',
+                            include: [
+                                {
+                                    model: Sex,
+                                    as: "sex"
+                                }
+                            ]
+                        }
+                    ]
+        })
+
+        const osteoCenters = await OsteoCenter.findAll({
+            include: [
+                        {
+                            model: Osteo,
+                            as: 'osteos',
                             include: [
                                 {
                                     model: Sex,
@@ -151,7 +169,9 @@ exports.createPatientForm = async (req, res) => {
             sexes,
             animalTypes,
             vetCenters,
-            limbs
+            osteoCenters,
+            limbs,
+            races
         });
     } catch (error) {
         console.error("Erreur lors de la récupération des données pour le formulaire :", error);
@@ -160,7 +180,7 @@ exports.createPatientForm = async (req, res) => {
 }
 
 exports.addPatient = async (req, res) => {
-    
+    console.log("Données reçues du formulaire :", req.body);
     let {
         name,
         birthYear,
@@ -189,7 +209,21 @@ exports.addPatient = async (req, res) => {
         departmentVetCenter,
         postalVetCenter,
         phoneVetCenter,
-        emailVetCenter
+        emailVetCenter,
+        vets,
+        osteoCenterId,
+        nameOsteoCenter,
+        adressOsteoCenter,
+        cityOsteoCenter,
+        departmentOsteoCenter,
+        postalOsteoCenter,
+        phoneOsteoCenter,
+        emailOsteoCenter,
+        osteos
+        // firstnameVet,
+        // lastnameVet,
+        // emailVet,
+        // phoneVet
     } = req.body;
 
 
@@ -212,17 +246,53 @@ exports.addPatient = async (req, res) => {
             customAnimalType = capitalizeFirstLetter(customAnimalType);
         }
     
-        if (nameVetCenter) {
-            nameVetCenter = capitalizeFirstLetter(nameVetCenter);
-        }
+        // if (nameVetCenter) {
+        //     nameVetCenter = capitalizeFirstLetter(nameVetCenter);
+        // }
 
-        if (cityVetCenter) {
-            cityVetCenter = capitalizeFirstLetter(cityVetCenter);
-        }
+        // if (cityVetCenter) {
+        //     cityVetCenter = capitalizeFirstLetter(cityVetCenter);
+        // }
 
-        if (departmentVetCenter) {
-            departmentVetCenter = capitalizeFirstLetter(departmentVetCenter);
-        }
+        // if (departmentVetCenter) {
+        //     departmentVetCenter = capitalizeFirstLetter(departmentVetCenter);
+        // }
+        // if (nameOsteoCenter) {
+        //     nameOsteoCenter = capitalizeFirstLetter(nameOsteoCenter);
+        // }
+
+        // if (cityOsteoCenter) {
+        //     cityOsteoCenter = capitalizeFirstLetter(cityOsteoCenter);
+        // }
+
+        // if (departmentOsteoCenter) {
+        //     departmentOsteoCenter = capitalizeFirstLetter(departmentOsteoCenter);
+        // }
+
+        // if (firstnameVet) {
+        //     firstnameVet = capitalizeFirstLetter(firstnameVet);
+        // }
+
+        // if (lastnameVet) {
+        //     lastnameVet = capitalizeFirstLetter(lastnameVet);
+        // }
+
+        // if (emailVet) {
+        //     emailVet = capitalizeFirstLetter(emailVet);
+        // }
+
+        // if (phoneVet) {
+        //     phoneVet = capitalizeFirstLetter(phoneVet);
+        // }
+
+    // Vérifier que 'vets' est un tableau, sinon l'initialiser à un tableau vide
+    if (!Array.isArray(vets)) {
+        vets = [];
+    }
+
+    if (!Array.isArray(osteos)) {
+        osteos = [];
+    }
 
     const fullAddress =`${adress}, ${postal} ${city}`;
     const vetFullAddress =`${adressVetCenter}, ${postalVetCenter} ${cityVetCenter}`;
@@ -240,28 +310,23 @@ exports.addPatient = async (req, res) => {
 
         let selectedAnimalType = null;
         let selectedRace = null;
-
-        // Si l'utilisateur a sélectionné "Autre" (ou un champ vide) pour le type d'animal
+        
+        // Si "Autre" est sélectionné pour le type d'animal ou un type personnalisé est fourni
         if (!animalTypeId && customAnimalType) {
             console.log("Création d'un type d'animal personnalisé:", customAnimalType);
-
+        
             // Vérifier si le type d'animal personnalisé existe déjà
             selectedAnimalType = await AnimalType.findOne({ where: { name: customAnimalType.trim() } });
-
+        
             // Si le type d'animal n'existe pas, le créer
             if (!selectedAnimalType) {
                 console.log("Le type d'animal n'existe pas, création...");
                 selectedAnimalType = await AnimalType.create({ name: customAnimalType.trim() });
             }
-
-            // Assurez-vous que `selectedAnimalType` a bien été créé
-            if (!selectedAnimalType) {
-                console.error("Erreur lors de la création du type d'animal personnalisé.");
-                return res.status(500).json({ error: 'Erreur lors de la création du type d\'animal personnalisé.' });
-            }
-            console.log("Type d'animal personnalisé créé :", selectedAnimalType);
-
-            // Si "Autre" est aussi sélectionné pour la race, créer ou trouver la race personnalisée
+        
+            console.log("Type d'animal personnalisé créé ou trouvé :", selectedAnimalType);
+        
+            // Gérer la race personnalisée
             if (customRace) {
                 console.log("Création d'une race personnalisée:", customRace);
                 selectedRace = await Race.findOne({
@@ -272,31 +337,30 @@ exports.addPatient = async (req, res) => {
                 }
                 console.log("Race personnalisée créée ou trouvée :", selectedRace);
             }
-        } else {
+        } else if (animalTypeId) {
             // Si un type d'animal existant est sélectionné
             console.log("Sélection d'un type d'animal existant:", animalTypeId);
             selectedAnimalType = await AnimalType.findByPk(animalTypeId);
-
+        
             if (!selectedAnimalType) {
                 console.error("Type d'animal non trouvé :", animalTypeId);
                 return res.status(400).json({ error: 'Type d\'animal non trouvé' });
             }
-
-            // Si "Autre" est sélectionné pour la race et qu'il y a une race personnalisée
-            if (!raceId && customRaceStandalone) {
-                console.log("Création d'une race personnalisée pour un type existant:", customRaceStandalone);
+        
+            // Gérer la race (existante ou personnalisée)
+            if (customRace) {
+                console.log("Création d'une race personnalisée pour un type existant:", customRace);
                 selectedRace = await Race.findOne({
-                    where: { name: customRaceStandalone.trim(), animalTypeId: selectedAnimalType.id }
+                    where: { name: customRace.trim(), animalTypeId: selectedAnimalType.id }
                 });
                 if (!selectedRace) {
                     selectedRace = await Race.create({
-                        name: customRaceStandalone.trim(),
+                        name: customRace.trim(),
                         animalTypeId: selectedAnimalType.id
                     });
                 }
                 console.log("Race personnalisée créée ou trouvée :", selectedRace);
             } else if (raceId) {
-                // Si une race existante est sélectionnée, on la récupère
                 console.log("Sélection d'une race existante:", raceId);
                 selectedRace = await Race.findOne({
                     where: { id: raceId, animalTypeId: selectedAnimalType.id }
@@ -308,11 +372,8 @@ exports.addPatient = async (req, res) => {
                 console.log("Race existante trouvée :", selectedRace);
             }
         }
-
         
 
-        
-        
 
         // Gestion du client
         let client = await Client.findOne({ where: { email } });
@@ -336,40 +397,86 @@ exports.addPatient = async (req, res) => {
         console.log("Client trouvé ou créé:", client);
 
         // Gestion du centre vétérinaire
-        let vetCenter;
+        let vetCenter = null;
         if (vetCenterId && vetCenterId !== 'other') {
-            console.log("Sélection d'un centre vétérinaire existant:", vetCenterId);
             vetCenter = await VetCenter.findByPk(vetCenterId);
-            if (!vetCenter) {
-                console.error("Centre vétérinaire non trouvé :", vetCenterId);
-                return res.status(400).json({ error: 'Centre vétérinaire non trouvé.' });
-            }
-        } else if (vetCenterId === 'other' || !vetCenterId) {
-            // Si vetCenterId est "other" ou vide, créer un centre vétérinaire personnalisé
-            console.log("Création d'un centre vétérinaire personnalisé:", nameVetCenter);
-
-            const { lat: vetLat, lng: vetLng } = await makeCoord(adress, postal, city);
-
-            // Vérifier si le centre vétérinaire personnalisé existe déjà via email
+            if (!vetCenter) return res.status(400).json({ error: 'Centre vétérinaire non trouvé.' });
+        } else if (vetCenterId === 'other' || (nameVetCenter && adressVetCenter && cityVetCenter)) {
+            const { lat: vetLat, lng: vetLng } = await makeCoord(adressVetCenter, postalVetCenter, cityVetCenter);
             vetCenter = await VetCenter.findOne({ where: { email: emailVetCenter } });
             if (!vetCenter) {
-                // Créer un nouveau centre vétérinaire si non trouvé
                 vetCenter = await VetCenter.create({
-                    name: nameVetCenter,
+                    name: capitalizeFirstLetter(nameVetCenter),
                     adress: adressVetCenter,
-                    city: cityVetCenter,
-                    department: departmentVetCenter,
+                    city: capitalizeFirstLetter(cityVetCenter),
+                    department: capitalizeFirstLetter(departmentVetCenter),
                     postal: postalVetCenter,
                     phone: phoneVetCenter,
                     email: emailVetCenter,
-                    latitude : vetLat,
+                    latitude: vetLat,
                     longitude: vetLng
                 });
-            } else {
-                console.log("Centre vétérinaire personnalisé existant trouvé:", vetCenter);
             }
         }
-        console.log("Centre vétérinaire trouvé ou créé:", vetCenter);
+
+        // Ajout des vétérinaires uniquement si un centre vétérinaire existe
+        if (vetCenter) {
+            for (const vet of vets) {
+                const firstname = vet.firstname ? capitalizeFirstLetter(vet.firstname) : null;
+                const lastname = vet.lastname ? capitalizeFirstLetter(vet.lastname) : null;
+                const email = vet.email ? vet.email : null;
+
+                if (firstname && lastname) {
+                    await Vet.create({
+                        firstname,
+                        lastname,
+                        email,
+                        vetCenterId: vetCenter.id
+                    });
+                }
+            }
+        }
+
+        // Gestion du centre ostéopathe
+        let osteoCenter = null;
+        if (osteoCenterId && osteoCenterId !== 'other') {
+            osteoCenter = await OsteoCenter.findByPk(osteoCenterId);
+            if (!osteoCenter) return res.status(400).json({ error: 'Centre ostéopathe non trouvé.' });
+        } else if (osteoCenterId === 'other' || (nameOsteoCenter && adressOsteoCenter && cityOsteoCenter)) {
+            const { lat: osteoLat, lng: osteoLng } = await makeCoord(adressOsteoCenter, postalOsteoCenter, cityOsteoCenter);
+            osteoCenter = await OsteoCenter.findOne({ where: { email: emailOsteoCenter } });
+            if (!osteoCenter) {
+                osteoCenter = await OsteoCenter.create({
+                    name: nameOsteoCenter,
+                    adress: adressOsteoCenter,
+                    city: cityOsteoCenter,
+                    department: departmentOsteoCenter,
+                    postal: postalOsteoCenter,
+                    phone: phoneOsteoCenter,
+                    email: emailOsteoCenter,
+                    latitude: osteoLat,
+                    longitude: osteoLng
+                });
+            }
+        }
+
+        // Ajout des ostéopathes uniquement si un centre ostéopathe existe
+        if (osteoCenter) {
+            for (const osteo of osteos) {
+                const firstname = osteo.firstname ? capitalizeFirstLetter(osteo.firstname) : null;
+                const lastname = osteo.lastname ? capitalizeFirstLetter(osteo.lastname) : null;
+                const email = osteo.email ? osteo.email : null;
+
+                if (firstname && lastname) {
+                    await Osteo.create({
+                        firstname,
+                        lastname,
+                        email,
+                        osteoCenterId: osteoCenter.id
+                    });
+                }
+            }
+        }
 
         const defaultPayment = await Payment.create({
             paymentTypeId : 1,
@@ -388,6 +495,7 @@ exports.addPatient = async (req, res) => {
             pathology,
             clientId: client.id,
             vetCenterId: vetCenter ? vetCenter.id : null,
+            osteoCenterId: osteoCenter ? osteoCenter.id : null,
             statusId : 1,
             paymentId : defaultPayment.id
         });
@@ -481,7 +589,17 @@ exports.patientDetails = async (req, res) => {
                             as: 'vets'
                         }
                     ]
-                } 
+                },
+                {
+                    model: OsteoCenter,
+                    as: "osteoCenter",
+                    include: [
+                        {
+                            model: Osteo,
+                            as: 'osteos'
+                        }
+                    ]
+                }  
             ]
         });
 
@@ -513,9 +631,9 @@ exports.editPatient = async (req, res) => {
             postal,
             department,
             clientSexId,
-            customAnimalType, 
-            customRace,
-            customRaceStandalone,
+            customAnimalType, // Custom type d'animal
+            customRace, // Custom race associé à customAnimalType
+            customRaceStandalone, // Custom race pour un type d'animal existant
             vetCenterId,
             nameVetCenter,
             adressVetCenter,
@@ -523,7 +641,17 @@ exports.editPatient = async (req, res) => {
             departmentVetCenter,
             postalVetCenter,
             phoneVetCenter,
-            emailVetCenter
+            emailVetCenter,
+            vets,
+            osteoCenterId,
+            nameOsteoCenter,
+            adressOsteoCenter,
+            cityOsteoCenter,
+            departmentOsteoCenter,
+            postalOsteoCenter,
+            phoneOsteoCenter,
+            emailOsteoCenter,
+            osteos
         } = req.body;
 
         // Capitalisation des valeurs
@@ -536,9 +664,17 @@ exports.editPatient = async (req, res) => {
         if (customRace) customRace = capitalizeFirstLetter(customRace);
         if (customRaceStandalone) customRaceStandalone = capitalizeFirstLetter(customRaceStandalone);
         if (customAnimalType) customAnimalType = capitalizeFirstLetter(customAnimalType);
-        if (nameVetCenter) nameVetCenter = capitalizeFirstLetter(nameVetCenter);
-        if (cityVetCenter) cityVetCenter = capitalizeFirstLetter(cityVetCenter);
-        if (departmentVetCenter) departmentVetCenter = capitalizeFirstLetter(departmentVetCenter);
+        // if (nameVetCenter) nameVetCenter = capitalizeFirstLetter(nameVetCenter);
+        // if (cityVetCenter) cityVetCenter = capitalizeFirstLetter(cityVetCenter);
+        // if (departmentVetCenter) departmentVetCenter = capitalizeFirstLetter(departmentVetCenter);
+
+        if (!Array.isArray(vets)) {
+            vets = [];
+        }
+    
+        if (!Array.isArray(osteos)) {
+            osteos = [];
+        }
 
         const fullAddress = `${adress}, ${postal} ${city}`;
         const vetFullAddress = `${adressVetCenter}, ${postalVetCenter} ${cityVetCenter}`;
@@ -596,31 +732,65 @@ exports.editPatient = async (req, res) => {
         // }
 
         // Gérer le type d'animal
-        if (!animalTypeId && customAnimalType) {
-            selectedAnimalType = await AnimalType.findOrCreate({
-                where: { name: customAnimalType.trim() }
-            });
+// Gérer le type d'animal
+if (!animalTypeId && customAnimalType) {
+    // Si "Autre" est sélectionné pour le type d'animal
+    console.log("Modification d'un type d'animal personnalisé:", customAnimalType);
 
-            if (customRace) {
-                selectedRace = await Race.findOrCreate({
-                    where: { name: customRace.trim(), animalTypeId: selectedAnimalType.id }
-                });
-            }
-        } else {
-            selectedAnimalType = await AnimalType.findByPk(animalTypeId);
-            if (!selectedAnimalType) return res.status(400).json({ error: 'Type d\'animal non trouvé' });
+    // Trouver ou créer le type d'animal personnalisé
+    const [animalType] = await AnimalType.findOrCreate({
+        where: { name: customAnimalType.trim() }
+    });
+    selectedAnimalType = animalType;
 
-            if (!raceId && customRaceStandalone) {
-                selectedRace = await Race.findOrCreate({
-                    where: { name: customRaceStandalone.trim(), animalTypeId: selectedAnimalType.id }
-                });
-            } else if (raceId) {
-                selectedRace = await Race.findOne({
-                    where: { id: raceId, animalTypeId: selectedAnimalType.id }
-                });
-                if (!selectedRace) return res.status(400).json({ error: 'Race non trouvée pour ce type d\'animal' });
-            }
+    console.log("Type d'animal personnalisé trouvé ou créé :", selectedAnimalType);
+
+    // Gérer la race personnalisée si fournie
+    if (customRace) {
+        console.log("Modification d'une race personnalisée:", customRace);
+        const [race] = await Race.findOrCreate({
+            where: { name: customRace.trim(), animalTypeId: selectedAnimalType.id }
+        });
+        selectedRace = race;
+
+        console.log("Race personnalisée trouvée ou créée :", selectedRace);
+    }
+} else if (animalTypeId) {
+    // Si un type d'animal existant est sélectionné
+    console.log("Modification pour un type d'animal existant:", animalTypeId);
+
+    selectedAnimalType = await AnimalType.findByPk(animalTypeId);
+    if (!selectedAnimalType) {
+        console.error("Type d'animal non trouvé :", animalTypeId);
+        return res.status(400).json({ error: 'Type d\'animal non trouvé' });
+    }
+
+    console.log("Type d'animal existant trouvé :", selectedAnimalType);
+
+    // Gérer la race (existante ou personnalisée)
+    if (customRace) {
+        console.log("Modification d'une race personnalisée pour un type existant:", customRace);
+        const [race] = await Race.findOrCreate({
+            where: { name: customRace.trim(), animalTypeId: selectedAnimalType.id }
+        });
+        selectedRace = race;
+
+        console.log("Race personnalisée trouvée ou créée :", selectedRace);
+    } else if (raceId) {
+        console.log("Modification pour une race existante:", raceId);
+
+        selectedRace = await Race.findOne({
+            where: { id: raceId, animalTypeId: selectedAnimalType.id }
+        });
+        if (!selectedRace) {
+            console.error("Race non trouvée pour ce type d'animal :", raceId);
+            return res.status(400).json({ error: 'Race non trouvée pour ce type d\'animal' });
         }
+
+        console.log("Race existante trouvée :", selectedRace);
+    }
+}
+
 
         // Gérer le client existant ou à mettre à jour
         let client = await Client.findByPk(patient.clientId);
@@ -643,22 +813,101 @@ exports.editPatient = async (req, res) => {
         if (vetCenterId && vetCenterId !== 'other') {
             vetCenter = await VetCenter.findByPk(vetCenterId);
             if (!vetCenter) return res.status(400).json({ error: 'Centre vétérinaire non trouvé' });
-        } else if (vetCenterId === 'other' || !vetCenterId) {
+        } else if (vetCenterId === 'other' || (nameVetCenter && adressVetCenter && cityVetCenter)) {
+            const { lat: vetLat, lng: vetLng } = await makeCoord(adressVetCenter, postalVetCenter, cityVetCenter);
+
             vetCenter = await VetCenter.findOrCreate({
                 where: { email: emailVetCenter },
                 defaults: {
-                    name: nameVetCenter, adress: adressVetCenter, city: cityVetCenter,
-                    department: departmentVetCenter, postal: postalVetCenter,
-                    phone: phoneVetCenter, email: emailVetCenter
+                    name: nameVetCenter, 
+                    adress: adressVetCenter, 
+                    city: cityVetCenter,
+                    department: departmentVetCenter, 
+                    postal: postalVetCenter,
+                    phone: phoneVetCenter, 
+                    email: emailVetCenter,
+                    latitude: vetLat,
+                    longitude: vetLng
                 }
             });
         }
 
+        if (vetCenter && Array.isArray(vetCenter)) {
+            vetCenter = vetCenter[0]; // Récupère l'instance créée ou trouvée
+        }
+        if (vetCenter) {
+            for (const vet of vets) {
+                const firstname = vet.firstname ? capitalizeFirstLetter(vet.firstname) : null;
+                const lastname = vet.lastname ? capitalizeFirstLetter(vet.lastname) : null;
+                const email = vet.email ? vet.email : null;
+
+                if (firstname && lastname) {
+                    await Vet.create({
+                        firstname,
+                        lastname,
+                        email,
+                        vetCenterId: vetCenter.id
+                    });
+                }
+            }
+        }
+
+        // Gérer le centre ostéopathique existant ou personnalisé
+        let osteoCenter;
+        if (osteoCenterId && osteoCenterId !== 'other') {
+            osteoCenter = await OsteoCenter.findByPk(osteoCenterId);
+            if (!osteoCenter) return res.status(400).json({ error: 'Centre ostéopathique non trouvé' });
+        } else if (osteoCenterId === 'other' || (nameOsteoCenter && adressOsteoCenter && cityOsteoCenter)) {
+            const { lat: osteoLat, lng: osteoLng } = await makeCoord(adressOsteoCenter, postalOsteoCenter, cityOsteoCenter);
+
+            osteoCenter = await OsteoCenter.findOrCreate({
+                where: { email: emailOsteoCenter },
+                defaults: {
+                    name: nameOsteoCenter, 
+                    adress: adressOsteoCenter, 
+                    city: cityOsteoCenter,
+                    department: departmentOsteoCenter, 
+                    postal: postalOsteoCenter,
+                    phone: phoneOsteoCenter, 
+                    email: emailOsteoCenter,
+                    latitude: osteoLat,
+                    longitude: osteoLng
+                }
+            });
+        }
+
+        if (osteoCenter && Array.isArray(osteoCenter)) {
+            osteoCenter = osteoCenter[0]; // Récupère l'instance créée ou trouvée
+        }
+        if (osteoCenter) {
+            for (const osteo of osteos) {
+                const firstname = osteo.firstname ? capitalizeFirstLetter(osteo.firstname) : null;
+                const lastname = osteo.lastname ? capitalizeFirstLetter(osteo.lastname) : null;
+                const email = osteo.email ? osteo.email : null;
+
+                if (firstname && lastname) {
+                    await Osteo.create({
+                        firstname,
+                        lastname,
+                        email,
+                        osteoCenterId: osteoCenter.id
+                    });
+                }
+            }
+        }
+
+
         await patient.update({
-            name, birthYear, sexId: selectedSex.id, weight,
+            name, 
+            birthYear, 
+            sexId: selectedSex.id, 
+            weight,
             animalTypeId: selectedAnimalType.id,
             raceId: selectedRace ? selectedRace.id : patient.raceId,
-            pathology, clientId: client.id, vetCenterId: vetCenter ? vetCenter.id : patient.vetCenterId
+            pathology, 
+            clientId: client.id, 
+            vetCenterId: vetCenter ? vetCenter.id : patient.vetCenterId,
+            osteoCenterId: osteoCenter ? osteoCenter.id : patient.osteoCenterId
         });
 
         console.log("Patient mis à jour avec succès :", patient);
@@ -747,7 +996,7 @@ exports.updatePatientStatus = async (req, res) => {
         if (!patient) {
             return res.status(404).json({ message: 'Patient non trouvé.' });
         }
-z
+
         // Trouve la status par son ID
         const status = await Status.findByPk(statusId);
         if (!status) {
