@@ -138,7 +138,8 @@ exports.addVetCenter = async (req, res) => {
             phone,
             infos,
             latitude: lat,
-            longitude: lng
+            longitude: lng,
+            contactId : 1
         });
 
         // Boucler sur chaque vétérinaire dans le tableau 'vets' et les ajouter à la base de données

@@ -828,7 +828,8 @@ if (!animalTypeId && customAnimalType) {
                     phone: phoneVetCenter, 
                     email: emailVetCenter,
                     latitude: vetLat,
-                    longitude: vetLng
+                    longitude: vetLng,
+                    contactId : 1
                 }
             });
         }
@@ -872,7 +873,8 @@ if (!animalTypeId && customAnimalType) {
                     phone: phoneOsteoCenter, 
                     email: emailOsteoCenter,
                     latitude: osteoLat,
-                    longitude: osteoLng
+                    longitude: osteoLng,
+                    contactId : 1
                 }
             });
         }

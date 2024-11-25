@@ -123,7 +123,8 @@ exports.addOsteoCenter = async (req, res) => {
             phone,
             infos,
             latitude: lat,
-            longitude: lng
+            longitude: lng,
+            contactId : 1
         });
 
         // Boucler sur chaque ostéopathe dans le tableau 'osteos' et les ajouter à la base de données
