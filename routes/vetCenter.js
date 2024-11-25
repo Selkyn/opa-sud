@@ -9,6 +9,7 @@ router.post('/add', vetCenterCtrl.addVetCenter);
 router.get('/:id', vetCenterCtrl.vetCenterDetails);
 router.delete('/:id/delete', vetCenterCtrl.deleteVetCenter);
 router.put('/:id/edit', vetCenterCtrl.editVetCenter);
+router.put('/:id/contact', vetCenterCtrl.updateVetCenterContact);
 
 
 // router.get('/form', patientCtrl.createPatientForm);

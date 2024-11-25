@@ -8,5 +8,6 @@ router.post('/add', osteoCenterCtrl.addOsteoCenter);
 router.get('/:id', osteoCenterCtrl.osteoCenterDetails);
 router.delete('/:id/delete', osteoCenterCtrl.deleteOsteoCenter);
 router.put('/:id/edit', osteoCenterCtrl.editOsteoCenter);
+router.put('/:id/contact', osteoCenterCtrl.updateOsteoCenterContact);
 
 module.exports = router;

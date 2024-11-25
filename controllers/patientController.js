@@ -15,6 +15,7 @@ const axios = require('axios');
 const Limb = require('../models/Limb');
 const OsteoCenter = require('../models/OsteoCenter');
 const Osteo = require('../models/Osteo');
+const Contact = require('../models/Contact');
 
 // Fonction pour capitaliser la première lettre de chaque mot
 const capitalizeFirstLetter = (str) => {
@@ -1013,4 +1014,6 @@ exports.updatePatientStatus = async (req, res) => {
         res.status(500).json({ message: 'Erreur lors de la mise à jour de la situation.' });
     }
 };
+
+
 

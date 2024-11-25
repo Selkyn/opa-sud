@@ -12,6 +12,8 @@ const paymentTypeRoute = require('./routes/paymentType');
 const paymentModeRoute = require('./routes/paymentMode');
 const paymentRoute = require('./routes/payment');
 const osteoCenterRoute = require('./routes/osteoCenter');
+const clientRoute = require('./routes/client');
+const contactRoute = require('./routes/contact');
 const test = require('./routes/sex')
 
 app.set('view engine', 'ejs');
@@ -52,6 +54,8 @@ app.use('/osteo-centers', osteoCenterRoute);
 app.use('/paymentTypes', paymentTypeRoute);
 app.use('/paymentModes', paymentModeRoute);
 app.use('/payment', paymentRoute);
+app.use('/clients', clientRoute);
+app.use('/contacts', contactRoute);
 app.use('/test', test)
 
 module.exports = app;

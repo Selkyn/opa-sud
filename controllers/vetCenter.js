@@ -1,3 +1,4 @@
+const Contact = require("../models/Contact");
 const Patient = require("../models/Patient")
 const Sex = require("../models/Sex")
 const Vet = require("../models/Vet")
@@ -30,6 +31,10 @@ exports.getVetCenters = async (req, res) => {
                 {
                     model: Vet,
                     as: "vets"
+                },
+                {
+                    model: Contact,
+                    as: 'contact'
                 }
             ]
         })
@@ -58,7 +63,12 @@ exports.vetCenterDetails = async (req, res) => {
                 {
                     model: Vet,
                     as: "vets",
+                },
+                {
+                    model: Contact,
+                    as: 'contact'
                 }
+                
             ]
         });
 
@@ -258,5 +268,32 @@ exports.editVetCenter = async (req, res) => {
     } catch (error) {
         console.error("Erreur lors de la mise à jour du centre vétérinaire :", error);
         res.status(500).json({ message: "Erreur lors de la mise à jour du centre vétérinaire" });
+    }
+};
+
+exports.updateVetCenterContact = async (req, res) => {
+    const vetCenterId = req.params.id; 
+    const { contactId } = req.body;
+
+    try {
+        const vetCenter = await VetCenter.findByPk(vetCenterId);
+        if (!vetCenter) {
+            return res.status(404).json({ message: 'vetCenter non trouvé.' });
+        }
+
+        // Trouve la status par son ID
+        const contact = await Contact.findByPk(contactId);
+        if (!contact) {
+            return res.contact(400).json({ message: 'contact non trouvée.' });
+        }
+
+        // Met à jour la situation du vetCenter
+        vetCenter.contactId = contactId;
+        await vetCenter.save();
+
+        res.status(200).json({ message: 'type de contact mis à jour avec succès.' });
+    } catch (error) {
+        console.error('Erreur lors de la mise à jour du type de contact :', error);
+        res.status(500).json({ message: 'Erreur lors de la mise à jour du type de contact.' });
     }
 };

@@ -2,6 +2,7 @@ const Patient = require("../models/Patient")
 const Sex = require("../models/Sex")
 const Osteo = require("../models/Osteo")
 const OsteoCenter = require("../models/OsteoCenter")
+const Contact = require("../models/Contact")
 const axios = require('axios');
 const Sequelize = require('sequelize');
 
@@ -30,6 +31,10 @@ exports.getOsteoCenters = async (req, res) => {
                 {
                     model: Osteo,
                     as: "osteos"
+                },
+                {
+                    model: Contact,
+                    as: 'contact'
                 }
             ]
         })
@@ -58,6 +63,10 @@ exports.osteoCenterDetails = async (req, res) => {
                 {
                     model: Osteo,
                     as: "osteos",
+                },
+                {
+                    model: Contact,
+                    as: 'contact'
                 }
             ]
         });
@@ -242,3 +251,31 @@ exports.editOsteoCenter = async (req, res) => {
         res.status(500).json({ message: "Erreur lors de la mise à jour du centre d'ostéopathie" });
     }
 };
+
+exports.updateOsteoCenterContact = async (req, res) => {
+    const osteoCenterId = req.params.id; 
+    const { contactId } = req.body;
+
+    try {
+        const osteoCenter = await OsteoCenter.findByPk(osteoCenterId);
+        if (!osteoCenter) {
+            return res.status(404).json({ message: 'osteoCenter non trouvé.' });
+        }
+
+        // Trouve le contact par son ID
+        const contact = await Contact.findByPk(contactId);
+        if (!contact) {
+            return res.status(400).json({ message: 'contact non trouvé.' });
+        }
+
+        // Met à jour le type de contact du osteoCenter
+        osteoCenter.contactId = contactId;
+        await osteoCenter.save();
+
+        res.status(200).json({ message: 'Type de contact mis à jour avec succès.' });
+    } catch (error) {
+        console.error('Erreur lors de la mise à jour du type de contact :', error);
+        res.status(500).json({ message: 'Erreur lors de la mise à jour du type de contact.' });
+    }
+};
+
