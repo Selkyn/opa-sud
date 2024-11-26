@@ -212,8 +212,10 @@ exports.editOsteoCenter = async (req, res) => {
 
         for (const osteo of osteos) {
 
-            const firstnameOsteo = capitalizeFirstLetter(osteo.firstname);
-            const lastnameOsteo = capitalizeFirstLetter(osteo.lastname);
+            const firstnameOsteo = osteo.firstname ? capitalizeFirstLetter(osteo.firstname) : null;
+            const lastnameOsteo = osteo.lastname ? capitalizeFirstLetter(osteo.lastname) : null;
+            const emailOsteo = osteo.email ? osteo.email : null;
+            const phoneOsteo = osteo.phone ? osteo.phone : null;
 
             if (osteo.id) {
                 // Si l'ostéopathe a un ID, il existe déjà, on le met à jour
@@ -221,7 +223,8 @@ exports.editOsteoCenter = async (req, res) => {
                     {
                         firstname: firstnameOsteo,
                         lastname: lastnameOsteo,
-                        email: osteo.email,
+                        email: emailOsteo,
+                        phone: phoneOsteo
                     },
                     { where: { id: osteo.id, osteoCenterId: osteoCenter.id } } // Mettre à jour si l'ostéopathe est lié à ce centre
                 );

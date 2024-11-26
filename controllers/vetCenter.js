@@ -116,7 +116,7 @@ exports.addVetCenter = async (req, res) => {
         // Capitaliser les premières lettres des champs nécessaires
         name = capitalizeFirstLetter(name);
         city = capitalizeFirstLetter(city);
-        department = capitalizeFirstLetter(department);
+        // department = capitalizeFirstLetter(department);
 
         // Construire l'adresse complète pour la géolocalisation
         const fullAddress = `${adress}, ${postal} ${city}`;
@@ -148,15 +148,17 @@ exports.addVetCenter = async (req, res) => {
             const firstname = vet.firstname ? capitalizeFirstLetter(vet.firstname) : null;
             const lastname = vet.lastname ? capitalizeFirstLetter(vet.lastname) : null;
             const email = vet.email ? vet.email : null;
+            const phone = vet.phone? vet.phone : null;
             // const sexIdVet = vet.sexIdVet ? vet.sexIdVet : null;
 
             // Vérifier que les informations minimales du vétérinaire sont présentes
             if (firstname && lastname) {
-                console.log("Ajout du vétérinaire :", firstname, lastname, email);
+                console.log("Ajout du vétérinaire :", firstname, lastname, email, phone);
                 await Vet.create({
                     firstname,
                     lastname,
                     email,
+                    phone,
                     // sexId: sexIdVet,
                     vetCenterId: newVetCenter.id
                 });
@@ -193,7 +195,7 @@ exports.editVetCenter = async (req, res) => {
 
     name = capitalizeFirstLetter(name);
     city = capitalizeFirstLetter(city);
-    department = capitalizeFirstLetter(department);
+    // department = capitalizeFirstLetter(department);
 
     const fullAddress = `${adress}, ${postal} ${city}`;
 
@@ -229,8 +231,10 @@ exports.editVetCenter = async (req, res) => {
 
         for (const vet of vets) {
 
-            const firstnameVet = capitalizeFirstLetter(vet.firstnameVet);
-            const lastnameVet = capitalizeFirstLetter(vet.lastnameVet);
+            const firstnameVet = vet.firstname ? capitalizeFirstLetter(vet.firstname) : null;
+            const lastnameVet = vet.lastname ? capitalizeFirstLetter(vet.lastname) : null;
+            const emailVet = vet.email ? vet.email : null;
+            const phoneVet = vet.phone ? vet.phone : null;
 
             if (vet.id) {
                 // Si le vétérinaire a un ID, il existe déjà, on le met à jour
@@ -238,7 +242,8 @@ exports.editVetCenter = async (req, res) => {
                     {
                         firstname: firstnameVet,
                         lastname: lastnameVet,
-                        email: vet.emailVet,
+                        email: emailVet,
+                        phone: phoneVet
                         // sexId: vet.sexIdVet
                     },
                     { where: { id: vet.id, vetCenterId: vetCenter.id } } // Mettre à jour si le vétérinaire est lié à ce centre

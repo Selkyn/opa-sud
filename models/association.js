@@ -17,6 +17,10 @@ const Role = require('./Role');
 const Limb = require('./Limb');;
 const Osteo = require('./Osteo');
 const OsteoCenter= require('./OsteoCenter');
+const { Association } = require('sequelize');
+const Appointment = require('./Appointment');
+const StatusAppointment = require('./StatusAppointment');
+const ReasonAppointment = require('./ReasonAppointment');
 
 
 // Fonction pour définir toutes les associations
@@ -242,6 +246,48 @@ const setupAssociations = () => {
         through: 'PatientLimb',
         foreignKey: 'limbId',
         timestamps: false
+    });
+
+    //ASSOCIATION RDV
+    Appointment.belongsTo(Patient, {
+        foreignKey: 'patientId',
+        as: 'patient'
+    });
+    Patient.hasMany(Appointment, {
+        foreignKey: 'patientId',
+        as: 'patientAppointments'
+    });
+    Appointment.belongsTo(VetCenter, {
+        foreignKey: 'vetCenterId',
+        as: 'vetCenter'
+    });
+    VetCenter.hasMany(Appointment, {
+        foreignKey: 'vetCenterId',
+        as: 'vetCenterAppointments'
+    });
+    Appointment.belongsTo(OsteoCenter, {
+        foreignKey: 'osteoCenterId',
+        as: 'osteoCenter'
+    });
+    OsteoCenter.hasMany(Appointment, {
+        foreignKey: 'osteoCenterId',
+        as: 'osteoCenterAppointments'
+    });
+    Appointment.belongsTo(StatusAppointment, {
+        foreignKey: 'statusAppointmentId',
+        as: 'statusAppointment'
+    });
+    StatusAppointment.hasMany(Appointment, {
+        foreignKey: 'statusAppointmentId',
+        as: 'statusAppointments'
+    });
+    Appointment.belongsTo(ReasonAppointment, {
+        foreignKey: 'reasonAppointmentId',
+        as: 'reasonAppointment'
+    });
+    ReasonAppointment.hasMany(Appointment, {
+        foreignKey: 'reasonAppointmentId',
+        as: 'reasonAppointments'
     });
 };
 

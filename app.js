@@ -14,6 +14,7 @@ const paymentRoute = require('./routes/payment');
 const osteoCenterRoute = require('./routes/osteoCenter');
 const clientRoute = require('./routes/client');
 const contactRoute = require('./routes/contact');
+const appointmentRoute = require('./routes/appointment');
 const test = require('./routes/sex')
 
 app.set('view engine', 'ejs');
@@ -56,6 +57,7 @@ app.use('/paymentModes', paymentModeRoute);
 app.use('/payment', paymentRoute);
 app.use('/clients', clientRoute);
 app.use('/contacts', contactRoute);
+app.use('/appointments', appointmentRoute);
 app.use('/test', test)
 
 module.exports = app;

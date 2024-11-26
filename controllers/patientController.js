@@ -233,7 +233,7 @@ exports.addPatient = async (req, res) => {
         firstname = capitalizeFirstLetter(firstname);
         lastname = capitalizeFirstLetter(lastname);
         city = capitalizeFirstLetter(city);
-        department = capitalizeFirstLetter(department);
+        // department = capitalizeFirstLetter(department);
         
         if (customRace) {
             customRace = capitalizeFirstLetter(customRace);
