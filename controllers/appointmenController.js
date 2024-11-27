@@ -28,6 +28,24 @@ exports.getAppointments = async (req, res) => {
             end: null,
             extendedProps: {
                 patientId: appointment.patientId,
+                entityType: appointment.patient?.id 
+                ? "Patient" 
+                : appointment.osteoCenter?.id
+                ? "Ostéopathe" 
+                : appointment.vetCenter?.id
+                ? "Vétérinaire"
+                : "Cible inconnu",
+                entityName: appointment.patient?.name 
+                    || appointment.vetCenter?.name 
+                    || appointment.osteoCenter?.name 
+                    || "Inconnu",
+                entityUrl: appointment.patient
+                    ? `/patients/${appointment.patientId}`
+                    : appointment.vetCenter
+                    ? `/centres-veterinaires/${appointment.vetCenterId}`
+                    : appointment.osteoCenter
+                    ? `/centres-osteopathes/${appointment.osteoCenterId}`
+                    : "#",
                 vetCenterId: appointment.vetCenterId,
                 osteoCenterId: appointment.osteoCenterId,
                 infos: appointment.infos,
@@ -77,3 +95,25 @@ exports.addAppointments = async (req, res ) => {
         return res.status(500).json({ message: "Une erreur s'est produite lors de la création du rendez-vous." });
     }
 };
+
+exports.getStatusAppointments = async ( req, res ) => {
+    try {
+        const statusAppointments = await StatusAppointment.findAll();
+        console.log(statusAppointments)
+        res.status(200).json(statusAppointments);
+    } catch (error) {
+        console.error("Erreur lors de la récupération des status de RDV :", error);
+        res.status(500).json({ error: "Erreur lors de la récupération des status de RDV" });
+    }
+}
+
+exports.getReasonAppointments = async ( req, res ) => {
+    try {
+        const reasonAppointments = await ReasonAppointment.findAll();
+        console.log(reasonAppointments)
+        res.status(200).json(reasonAppointments);
+    } catch (error) {
+        console.error("Erreur lors de la récupération des raisons de RDV :", error);
+        res.status(500).json({ error: "Erreur lors de la récupération des raisons de RDV" });
+    }
+}
