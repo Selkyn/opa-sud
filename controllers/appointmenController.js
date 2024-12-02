@@ -23,9 +23,11 @@ exports.getAppointments = async (req, res) => {
 
         // Transformation des rendez-vous pour FullCalendar
         const formattedAppointments = appointments.map((appointment) => ({
+            id: appointment.id,
             title: appointment.reasonAppointment?.name || "Rendez-vous",
-            start: appointment.appointmentDate,
-            end: null,
+            start: appointment.start_time,
+            end: appointment.end_time || null,
+            eventType: "appointment",
             extendedProps: {
                 patientId: appointment.patientId,
                 entityType: appointment.patient?.id 
@@ -60,27 +62,41 @@ exports.getAppointments = async (req, res) => {
     }
 };
 
-exports.addAppointments = async (req, res ) => {
+exports.addAppointments = async (req, res) => {
     try {
         const {
-            appointmentDate,
-            patientId,
-            vetCenterId,
-            osteoCenterId,
+            start_time,
+            end_time,
+            participantType, // Type du participant : patient, vetCenter, osteoCenter
+            participantId,   // ID du participant
             infos,
             statusAppointmentId,
             reasonAppointmentId
-        } = req.body
+        } = req.body;
 
-        if (new Date(appointmentDate) <= new Date()) {
-            return res.status(400).json({ message: "La date du rendez-vous doit être dans le futur." });
+        // Initialisez les valeurs par défaut
+        let patientId = null;
+        let vetCenterId = null;
+        let osteoCenterId = null;
+
+        // Assignez dynamiquement les valeurs selon le type de participant
+        if (participantType === "patient") {
+            patientId = participantId;
+        } else if (participantType === "vetCenter") {
+            vetCenterId = participantId;
+        } else if (participantType === "osteoCenter") {
+            osteoCenterId = participantId;
+        } else {
+            return res.status(400).json({ message: "Type de participant invalide." });
         }
 
+        // Création du rendez-vous
         const appointment = await Appointment.create({
-            appointmentDate,
-            patientId: patientId || null,
-            vetCenterId: vetCenterId || null,
-            osteoCenterId: osteoCenterId || null,
+            start_time,
+            end_time,
+            patientId,
+            vetCenterId,
+            osteoCenterId,
             infos,
             statusAppointmentId,
             reasonAppointmentId
@@ -115,5 +131,19 @@ exports.getReasonAppointments = async ( req, res ) => {
     } catch (error) {
         console.error("Erreur lors de la récupération des raisons de RDV :", error);
         res.status(500).json({ error: "Erreur lors de la récupération des raisons de RDV" });
+    }
+}
+
+exports.deleteAppointment = async (req, res) => {
+    try {
+        const appointmentId = req.params.id;
+        const appointment = await Appointment.findByPk(appointmentId);
+
+        await appointment.destroy();
+
+        res.status(200).json({ message: "Tache de travail supprimé avec succès"})
+    } catch (error) {
+        console.error("Erreur lors de la suppression de la tache de travail :", error);
+        res.status(400).json({ error });
     }
 }

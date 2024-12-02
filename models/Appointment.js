@@ -36,9 +36,13 @@ const Appointment = sequelize.define('Appointment', {
             key: 'id'       
         }
     },
-    appointmentDate: {
+    start_time: {
         type: DataTypes.DATE,
-        allowNull: false
+        allowNull: false,
+    },
+    end_time: {
+        type: DataTypes.DATE,
+        allowNull: true,
     },
     infos: {
         type: DataTypes.STRING,
@@ -62,6 +66,6 @@ const Appointment = sequelize.define('Appointment', {
     },  
 }, {
     timestamps: true
-  });
+});
 
-  module.exports = Appointment;
+module.exports = Appointment;

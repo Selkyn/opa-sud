@@ -21,6 +21,8 @@ const { Association } = require('sequelize');
 const Appointment = require('./Appointment');
 const StatusAppointment = require('./StatusAppointment');
 const ReasonAppointment = require('./ReasonAppointment');
+const WorkSchedule = require('./WorkSchedule');
+const Task = require('./Task');
 
 
 // Fonction pour définir toutes les associations
@@ -288,6 +290,24 @@ const setupAssociations = () => {
     ReasonAppointment.hasMany(Appointment, {
         foreignKey: 'reasonAppointmentId',
         as: 'reasonAppointments'
+    });
+
+    //ASSOCIATION WorkSchedule
+    WorkSchedule.belongsTo(Task, {
+        foreignKey: 'taskId',
+        as: 'task'
+    });
+    Task.hasMany(WorkSchedule, {
+        foreignKey: 'taskId',
+        as: 'workSchedules'
+    });
+    WorkSchedule.belongsTo(Patient, {
+        foreignKey: 'patientId',
+        as: 'patient'
+    });
+    Patient.hasMany(WorkSchedule, {
+        foreignKey: 'patientId',
+        as: 'workSchedules'
     });
 };
 
