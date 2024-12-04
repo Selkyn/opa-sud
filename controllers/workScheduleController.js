@@ -13,16 +13,16 @@ exports.getWorkSchedules = async (req, res) => {
 
         const formattedAppointments = workSchedules.map((workSchedule) => ({
             id: workSchedule.id,
-            title: workSchedule.task?.name || custom_task_name || "Tache",
+            title: workSchedule.task?.name || workSchedule.custom_task_name || "Tache",
             start: workSchedule.start_time,
             end: workSchedule.end_time || null,
             eventType: "workSchedule",
             extendedProps: {
-                patientId: workSchedule.patiendId,
-                entityName: workSchedule.patient?.name,
-                entityUrl : workSchedule ? `/patients/${workSchedule.patientId}`: "#"
-            }
-        }))
+              patientId: workSchedule.patientId, // Correction : patiendId -> patientId
+              entityName: workSchedule.patient?.name,
+              entityUrl: workSchedule.patient ? `/patients/${workSchedule.patientId}` : "#",
+            },
+          }));
 
         res.status(200).json(formattedAppointments);
     } catch (error) {
@@ -58,6 +58,63 @@ exports.addWorkSchedules = async (req, res) => {
         return res.status(500).json({ message: "Une erreur s'est produite lors de la création de la tache de travail." });
     }
 }
+
+exports.editWorkSchedule = async (req, res) => {
+    const { id } = req.params;
+    const { start, end, patientId, taskId, custom_task_name } = req.body;
+  
+    try {
+      // Vérifiez que la tâche existe
+      const workSchedule = await WorkSchedule.findByPk(id, {
+        include: [
+          { model: Patient, as: 'patient' },
+          { model: Task, as: 'task' },
+        ],
+      });
+      if (!workSchedule) {
+        return res.status(404).json({ message: "Tâche de travail non trouvée" });
+      }
+  
+      // Mettez à jour la tâche
+      await workSchedule.update({
+        start_time: start,
+        end_time: end,
+        patientId: patientId || null,
+        taskId: taskId || null,
+        custom_task_name: custom_task_name || null,
+      });
+  
+      // Rechargez les données complètes
+      const updatedWorkSchedule = await WorkSchedule.findByPk(id, {
+        include: [
+          { model: Patient, as: 'patient' },
+          { model: Task, as: 'task' },
+        ],
+      });
+  
+      res.status(200).json({
+        message: "Tâche de travail mise à jour avec succès",
+        workSchedule: {
+          id: updatedWorkSchedule.id,
+          title: updatedWorkSchedule.task?.name || updatedWorkSchedule.custom_task_name || "Tache",
+          start: updatedWorkSchedule.start_time,
+          end: updatedWorkSchedule.end_time,
+          eventType: "workSchedule",
+          extendedProps: {
+            patientId: updatedWorkSchedule.patientId,
+            entityName: updatedWorkSchedule.patient?.name,
+            taskId: updatedWorkSchedule.taskId,
+            customTaskName: updatedWorkSchedule.custom_task_name,
+          },
+        },
+      });
+    } catch (error) {
+      console.error("Erreur lors de la mise à jour de la tâche de travail :", error);
+      res.status(500).json({ message: "Erreur lors de la mise à jour de la tâche de travail" });
+    }
+  };
+  
+  
 
 exports.getTask = async (req, res) => {
     try {

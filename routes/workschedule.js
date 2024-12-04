@@ -7,5 +7,6 @@ router.get('/', workScheduleCtrl.getWorkSchedules);
 router.get('/tasks', workScheduleCtrl.getTask);
 router.post('/add', workScheduleCtrl.addWorkSchedules);
 router.delete('/:id/delete', workScheduleCtrl.deleteWorkSchedule);
+router.put('/:id/edit', workScheduleCtrl.editWorkSchedule);
 
 module.exports = router;

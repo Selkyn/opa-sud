@@ -1,6 +1,9 @@
+const Appointment = require("../models/Appointment");
 const Contact = require("../models/Contact");
-const Patient = require("../models/Patient")
-const Sex = require("../models/Sex")
+const Patient = require("../models/Patient");
+const ReasonAppointment = require("../models/ReasonAppointment");
+const Sex = require("../models/Sex");
+const StatusAppointment = require("../models/StatusAppointment");
 const Vet = require("../models/Vet")
 const VetCenter = require("../models/VetCenter")
 const axios = require('axios');
@@ -67,7 +70,21 @@ exports.vetCenterDetails = async (req, res) => {
                 {
                     model: Contact,
                     as: 'contact'
-                }
+                },
+                {
+                    model: Appointment,
+                    as: "vetCenterAppointments",
+                    include: [
+                        {
+                            model: ReasonAppointment,
+                            as: 'reasonAppointment'
+                        },
+                        {
+                            model: StatusAppointment,
+                            as: 'statusAppointment'
+                        }
+                    ]
+                }  
                 
             ]
         });

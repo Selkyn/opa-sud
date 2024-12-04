@@ -5,6 +5,9 @@ const OsteoCenter = require("../models/OsteoCenter")
 const Contact = require("../models/Contact")
 const axios = require('axios');
 const Sequelize = require('sequelize');
+const Appointment = require("../models/Appointment")
+const ReasonAppointment = require("../models/ReasonAppointment")
+const StatusAppointment = require("../models/StatusAppointment")
 
 // Fonction pour capitaliser la première lettre de chaque mot
 const capitalizeFirstLetter = (str) => {
@@ -67,7 +70,21 @@ exports.osteoCenterDetails = async (req, res) => {
                 {
                     model: Contact,
                     as: 'contact'
-                }
+                },
+                {
+                    model: Appointment,
+                    as: "osteoCenterAppointments",
+                    include: [
+                        {
+                            model: ReasonAppointment,
+                            as: 'reasonAppointment'
+                        },
+                        {
+                            model: StatusAppointment,
+                            as: 'statusAppointment'
+                        }
+                    ]
+                }  
             ]
         });
 

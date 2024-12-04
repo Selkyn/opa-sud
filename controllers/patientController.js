@@ -16,6 +16,11 @@ const Limb = require('../models/Limb');
 const OsteoCenter = require('../models/OsteoCenter');
 const Osteo = require('../models/Osteo');
 const Contact = require('../models/Contact');
+const Appointment = require('../models/Appointment');
+const ReasonAppointment = require('../models/ReasonAppointment');
+const StatusAppointment = require('../models/StatusAppointment');
+const WorkSchedule = require('../models/WorkSchedule');
+const Task = require('../models/Task');
 
 // Fonction pour capitaliser la première lettre de chaque mot
 const capitalizeFirstLetter = (str) => {
@@ -600,10 +605,34 @@ exports.patientDetails = async (req, res) => {
                             as: 'osteos'
                         }
                     ]
-                }  
+                },
+                {
+                    model: Appointment,
+                    as: "patientAppointments",
+                    include: [
+                        {
+                            model: ReasonAppointment,
+                            as: 'reasonAppointment'
+                        },
+                        {
+                            model: StatusAppointment,
+                            as: 'statusAppointment'
+                        }
+                    ]
+                },
+                {
+                    model: WorkSchedule,
+                    as: "workSchedules",
+                    include: [
+                        {
+                            model: Task,
+                            as: 'task'
+                        }
+                    ]
+                }
             ]
         });
-
+        console.log(patient)
         res.status(200).json(patient);
     } catch (error) {
         console.error("Erreur lors de la récupération des détails du patient :", error);
