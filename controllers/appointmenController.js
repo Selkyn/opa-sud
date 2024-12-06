@@ -37,41 +37,46 @@ exports.getAppointments = async (req, res) => {
                       .format("YYYY-MM-DDTHH:mm:ss")
                 : null;
 
-            return {
-                id: appointment.id,
-                title: appointment.reasonAppointment?.name || "Rendez-vous",
-                start: start_time_local,
-                end: end_time_local,
-                eventType: "appointment",
-                extendedProps: {
-                    patientId: appointment.patientId,
-                    entityType: appointment.patient?.id
-                        ? "Patient"
-                        : appointment.osteoCenter?.id
-                        ? "Ostéopathe"
-                        : appointment.vetCenter?.id
-                        ? "Vétérinaire"
-                        : "Cible inconnue",
-                    entityName:
-                        appointment.patient?.name ||
-                        appointment.vetCenter?.name ||
-                        appointment.osteoCenter?.name ||
-                        "Inconnu",
-                    entityUrl: appointment.patient
-                        ? `/patients/${appointment.patientId}`
-                        : appointment.vetCenter
-                        ? `/centres-veterinaires/${appointment.vetCenterId}`
-                        : appointment.osteoCenter
-                        ? `/centres-osteopathes/${appointment.osteoCenterId}`
-                        : "#",
-                    vetCenterId: appointment.vetCenterId,
-                    osteoCenterId: appointment.osteoCenterId,
-                    infos: appointment.infos,
-                    status: appointment.statusAppointment?.name,
-                },
-            };
+                return {
+                    id: appointment.id,
+                    title: appointment.reasonAppointment?.name || "Rendez-vous",
+                    start: start_time_local,
+                    end: end_time_local,
+                    eventType: "appointment",
+                    extendedProps: {
+                        patientId: appointment.patientId,
+                        vetCenterId: appointment.vetCenterId,
+                        osteoCenterId: appointment.osteoCenterId,
+                        entityType: appointment.patient?.id
+                            ? "patient"
+                            : appointment.osteoCenter?.id
+                            ? "osteoCenter"
+                            : appointment.vetCenter?.id
+                            ? "vetCenter"
+                            : "Cible inconnue",
+                        entityName:
+                            appointment.patient?.name ||
+                            appointment.vetCenter?.name ||
+                            appointment.osteoCenter?.name ||
+                            "Inconnu",
+                        entityUrl: appointment.patient
+                            ? `/patients/${appointment.patientId}`
+                            : appointment.vetCenter
+                            ? `/centres-veterinaires/${appointment.vetCenterId}`
+                            : appointment.osteoCenter
+                            ? `/centres-osteopathes/${appointment.osteoCenterId}`
+                            : "#",
+                        infos: appointment.infos,
+                        status: appointment.statusAppointment?.name,
+                        reasonAppointmentId: appointment.reasonAppointment?.id || null, // Ajout de l'ID de la raison
+                        statusAppointmentId: appointment.statusAppointment?.id || null, // Ajout de l'ID du statut
+                    },
+                    
+                };
+                
+                
         });
-
+        console.log("Données formatées des rendez-vous :", formattedAppointments);
         res.status(200).json(formattedAppointments);
     } catch (error) {
         console.error("Erreur lors de la récupération des RDV :", error);

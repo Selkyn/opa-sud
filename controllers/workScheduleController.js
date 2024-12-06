@@ -18,9 +18,10 @@ exports.getWorkSchedules = async (req, res) => {
             end: workSchedule.end_time || null,
             eventType: "workSchedule",
             extendedProps: {
-              patientId: workSchedule.patientId, // Correction : patiendId -> patientId
+              patientId: workSchedule.patientId || null, // Correction : patiendId -> patientId
               entityName: workSchedule.patient?.name,
               entityUrl: workSchedule.patient ? `/patients/${workSchedule.patientId}` : "#",
+              taskId: workSchedule.task.id || null
             },
           }));
 
@@ -61,7 +62,7 @@ exports.addWorkSchedules = async (req, res) => {
 
 exports.editWorkSchedule = async (req, res) => {
     const { id } = req.params;
-    const { start, end, patientId, taskId, custom_task_name } = req.body;
+    const { start_time, end_time, patientId, taskId, custom_task_name } = req.body;
   
     try {
       // Vérifiez que la tâche existe
@@ -77,8 +78,8 @@ exports.editWorkSchedule = async (req, res) => {
   
       // Mettez à jour la tâche
       await workSchedule.update({
-        start_time: start,
-        end_time: end,
+        start_time,
+        end_time,
         patientId: patientId || null,
         taskId: taskId || null,
         custom_task_name: custom_task_name || null,
