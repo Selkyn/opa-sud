@@ -216,6 +216,7 @@ exports.addPatient = async (req, res) => {
         postalVetCenter,
         phoneVetCenter,
         emailVetCenter,
+        infosVetCenter,
         vets,
         osteoCenterId,
         nameOsteoCenter,
@@ -225,6 +226,7 @@ exports.addPatient = async (req, res) => {
         postalOsteoCenter,
         phoneOsteoCenter,
         emailOsteoCenter,
+        infosOsteoCenter,
         osteos
         // firstnameVet,
         // lastnameVet,
@@ -419,6 +421,7 @@ exports.addPatient = async (req, res) => {
                     postal: postalVetCenter,
                     phone: phoneVetCenter,
                     email: emailVetCenter,
+                    infos: infosVetCenter,
                     latitude: vetLat,
                     longitude: vetLng
                 });
@@ -460,6 +463,7 @@ exports.addPatient = async (req, res) => {
                     postal: postalOsteoCenter,
                     phone: phoneOsteoCenter,
                     email: emailOsteoCenter,
+                    infosOsteoCenter,
                     latitude: osteoLat,
                     longitude: osteoLng
                 });
@@ -672,6 +676,7 @@ exports.editPatient = async (req, res) => {
             postalVetCenter,
             phoneVetCenter,
             emailVetCenter,
+            infosVetCenter,
             vets,
             osteoCenterId,
             nameOsteoCenter,
@@ -681,6 +686,7 @@ exports.editPatient = async (req, res) => {
             postalOsteoCenter,
             phoneOsteoCenter,
             emailOsteoCenter,
+            infosOsteoCenter,
             osteos
         } = req.body;
 
@@ -856,6 +862,7 @@ if (!animalTypeId && customAnimalType) {
                     postal: postalVetCenter,
                     phone: phoneVetCenter, 
                     email: emailVetCenter,
+                    infos: infosVetCenter,
                     latitude: vetLat,
                     longitude: vetLng,
                     contactId : 1
@@ -901,6 +908,7 @@ if (!animalTypeId && customAnimalType) {
                     postal: postalOsteoCenter,
                     phone: phoneOsteoCenter, 
                     email: emailOsteoCenter,
+                    infos: infosOsteoCenter,
                     latitude: osteoLat,
                     longitude: osteoLng,
                     contactId : 1

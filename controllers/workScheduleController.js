@@ -1,36 +1,54 @@
 const Patient = require('../models/Patient');
 const WorkSchedule = require('../models/WorkSchedule');
 const Task = require('../models/Task');
+const moment = require("moment-timezone");
 
 exports.getWorkSchedules = async (req, res) => {
-    try {
-        const workSchedules = await WorkSchedule.findAll({
-            include: [
-                {model: Patient, as: 'patient'},
-                {model: Task, as: 'task'}
-            ]
-        })
+  try {
+      const timezone = req.query.timezone || "Europe/Paris";
 
-        const formattedAppointments = workSchedules.map((workSchedule) => ({
-            id: workSchedule.id,
-            title: workSchedule.task?.name || workSchedule.custom_task_name || "Tache",
-            start: workSchedule.start_time,
-            end: workSchedule.end_time || null,
-            eventType: "workSchedule",
-            extendedProps: {
-              patientId: workSchedule.patientId || null, // Correction : patiendId -> patientId
-              entityName: workSchedule.patient?.name,
-              entityUrl: workSchedule.patient ? `/patients/${workSchedule.patientId}` : "#",
-              taskId: workSchedule.task.id || null
-            },
-          }));
+      const workSchedules = await WorkSchedule.findAll({
+          include: [
+              { model: Patient, as: 'patient' },
+              { model: Task, as: 'task' },
+          ],
+      });
 
-        res.status(200).json(formattedAppointments);
-    } catch (error) {
-        console.error("Erreur lors de la récupération des taches :", error);
-        res.status(500).json({ error: "Erreur lors de la récupération des taches"})
-    }
+      const formattedWorkSchedules = workSchedules.map((workSchedule) => {
+          const start_time_local = moment(workSchedule.start_time)
+              .tz(timezone)
+              .format("YYYY-MM-DDTHH:mm:ss"); // Format ISO
+
+          const end_time_local = workSchedule.end_time
+              ? moment(workSchedule.end_time)
+                    .tz(timezone)
+                    .format("YYYY-MM-DDTHH:mm:ss")
+              : null;
+
+          return {
+              id: workSchedule.id,
+              title: workSchedule.task?.name || workSchedule.custom_task_name || "Tâche",
+              start: start_time_local,
+              end: end_time_local,
+              eventType: "workSchedule",
+              extendedProps: {
+                  patientId: workSchedule.patientId || null,
+                  entityName: workSchedule.patient?.name || null,
+                  entityUrl: workSchedule.patient
+                      ? `/patients/${workSchedule.patientId}`
+                      : "#",
+                  taskId: workSchedule.task?.id || null,
+              },
+          };
+      });
+
+      res.status(200).json(formattedWorkSchedules);
+  } catch (error) {
+      console.error("Erreur lors de la récupération des tâches :", error);
+      res.status(500).json({ error: "Erreur lors de la récupération des tâches" });
+  }
 };
+
 
 exports.addWorkSchedules = async (req, res) => {
     try {
