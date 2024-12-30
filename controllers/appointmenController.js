@@ -90,18 +90,18 @@ exports.addAppointments = async (req, res) => {
             start_time,
             end_time,
             participantType, // Type du participant : patient, vetCenter, osteoCenter
-            participantId,   // ID du participant
+            participantId, 
             infos,
             statusAppointmentId,
             reasonAppointmentId
         } = req.body;
 
-        // Initialisez les valeurs par défaut
+        // Initialiser les valeurs par défaut
         let patientId = null;
         let vetCenterId = null;
         let osteoCenterId = null;
 
-        // Assignez dynamiquement les valeurs selon le type de participant
+        // Assigner dynamiquement les valeurs selon le type de participant
         if (participantType === "patient") {
             patientId = participantId;
         } else if (participantType === "vetCenter") {
@@ -112,7 +112,6 @@ exports.addAppointments = async (req, res) => {
             return res.status(400).json({ message: "Type de participant invalide." });
         }
 
-        // Création du rendez-vous
         const appointment = await Appointment.create({
             start_time,
             end_time,
@@ -136,29 +135,29 @@ exports.addAppointments = async (req, res) => {
 
 exports.editAppointments = async (req, res) => {
     try {
-        const { id } = req.params; // Récupérer l'ID du rendez-vous depuis les paramètres de la requête
+        const { id } = req.params;
         const {
             start_time,
             end_time,
             participantType, // Type du participant : patient, vetCenter, osteoCenter
-            participantId,   // ID du participant
+            participantId, 
             infos,
             statusAppointmentId,
             reasonAppointmentId
         } = req.body;
 
-        // Vérifiez si le rendez-vous existe
+        // Vérifier si le rendez-vous existe
         const appointment = await Appointment.findByPk(id);
         if (!appointment) {
             return res.status(404).json({ message: "Rendez-vous introuvable." });
         }
 
-        // Initialisez les valeurs par défaut
+        // Initialiser les valeurs par défaut
         let patientId = null;
         let vetCenterId = null;
         let osteoCenterId = null;
 
-        // Assignez dynamiquement les valeurs selon le type de participant
+        // Assigner dynamiquement les valeurs selon le type de participant
         if (participantType === "patient") {
             patientId = participantId;
         } else if (participantType === "vetCenter") {
