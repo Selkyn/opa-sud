@@ -271,7 +271,8 @@ exports.editVetCenter = async (req, res) => {
                 const newVet = await Vet.create({
                     firstname: firstnameVet,
                     lastname: lastnameVet,
-                    email: vet.emailVet,
+                    email: emailVet,
+                    phone: phoneVet,
                     // sexId: vet.sexIdVet,
                     vetCenterId: vetCenter.id // Associe le vétérinaire au centre vétérinaire
                 });
