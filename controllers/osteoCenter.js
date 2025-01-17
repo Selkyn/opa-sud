@@ -128,6 +128,10 @@ exports.addOsteoCenter = async (req, res) => {
             `https://api.opencagedata.com/geocode/v1/json?q=${encodeURIComponent(fullAddress)}&key=${apiKey}`
         );
         const { lat, lng } = osteoGeocodeResponse.data.results[0].geometry;
+        if (!lat || !lng) {
+            console.log("erreur d adresse")
+            return res.status(400).json({ error: "Adresse invalide ou introuvable." });
+        }
 
         // Créer le centre d'ostéopathie dans la base de données
         const newOsteoCenter = await OsteoCenter.create({
@@ -150,14 +154,15 @@ exports.addOsteoCenter = async (req, res) => {
             const firstname = osteo.firstname ? capitalizeFirstLetter(osteo.firstname) : null;
             const lastname = osteo.lastname ? capitalizeFirstLetter(osteo.lastname) : null;
             const email = osteo.email ? osteo.email : null;
+            const phone = osteo.phone ? osteo.phone : null;
 
             // Vérifier que les informations minimales de l'ostéopathe sont présentes
             if (firstname && lastname) {
-                console.log("Ajout de l'ostéopathe :", firstname, lastname, email);
                 await Osteo.create({
                     firstname,
                     lastname,
                     email,
+                    phone,
                     osteoCenterId: newOsteoCenter.id
                 });
             } else {
@@ -252,6 +257,7 @@ exports.editOsteoCenter = async (req, res) => {
                     firstname: firstnameOsteo,
                     lastname: lastnameOsteo,
                     email: osteo.email,
+                    phone: osteo.phone,
                     osteoCenterId: osteoCenter.id // Associe l'ostéopathe au centre d'ostéopathie
                 });
                 existingOsteoIds.push(newOsteo.id); // Ajouter l'ID du nouvel ostéopathe à la liste

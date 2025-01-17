@@ -5,7 +5,7 @@ const PaymentMode = require('../models/PaymentMode');
 
 exports.updatePatientPayment = async (req, res) => {
     const patientId = req.params.id;
-    const { paymentTypeId, paymentModeId, date } = req.body;
+    const { paymentTypeId, paymentModeId, paymentStatusId, date, endDate, amount } = req.body;
     try {
         console.log(`Requête de mise à jour du paiement pour le patient: ${patientId}`);
         console.log(`paymentTypeId: ${paymentTypeId}, paymentModeId: ${paymentModeId}, date: ${date}`);
@@ -27,7 +27,10 @@ exports.updatePatientPayment = async (req, res) => {
             payment = await Payment.create({
                 paymentTypeId: paymentTypeId || null,
                 paymentModeId: paymentModeId || null,
+                paymentStatusId: paymentStatusId || null,
                 date: date || new Date(),
+                endDate: endDate || new Date(),
+                amount: amount || null,
             });
 
             // Associe le paiement créé au patient
@@ -45,9 +48,21 @@ exports.updatePatientPayment = async (req, res) => {
                 console.log(`Mise à jour du paymentModeId: ${paymentModeId}`);
                 payment.paymentModeId = paymentModeId;
             }
+            if (paymentStatusId !== undefined) {
+                console.log(`Mise à jour du paymentStatusId: ${paymentStatusId}`);
+                payment.paymentStatusId = paymentStatusId;
+            }
             if (date !== undefined) {
                 console.log(`Mise à jour de la date du paiement: ${date}`);
                 payment.date = date;
+            }
+            if (endDate !== undefined) {
+                console.log(`Mise à jour de la date du paiement: ${endDate}`);
+                payment.endDate = endDate;
+            }
+            if (amount !== undefined) {
+                console.log(`Mise à jour de la date du paiement: ${amount}`);
+                payment.amount = amount;
             }
 
             await payment.save();

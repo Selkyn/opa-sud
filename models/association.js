@@ -6,6 +6,7 @@ const Patient = require('./Patient');
 const Payment = require('./Payment');
 const PaymentMode = require('./PaymentMode');
 const PaymentType = require('./PaymentType');
+const PaymentStatus = require('./PaymentStatus');
 const Sex = require('./Sex');
 const Status = require('./Status');
 const Vet = require('./Vet');
@@ -121,7 +122,8 @@ const setupAssociations = () => {
     //ASSOCIATION ANIMALTYPE
     Race.belongsTo(AnimalType, {
         foreignKey: 'animalTypeId',
-        as: 'animalType'
+        as: 'animalType',
+        onDelete: 'CASCADE',
     });
     AnimalType.hasMany(Race, {
         foreignKey: 'animalTypeId',
@@ -156,6 +158,14 @@ const setupAssociations = () => {
         foreignKey: 'paymentModeId',
         as: 'payments'
     });
+    Payment.belongsTo(PaymentStatus, {
+        foreignKey: 'paymentStatusId',
+        as: 'paymentStatus'
+    });
+    PaymentStatus.hasMany(Payment, {
+        foreignKey: 'paymentStatusId',
+        as: 'payments'
+    });
     // END ASSOCIATION PAYMENT
 
     //ASSOCIATION VETCENTER
@@ -171,7 +181,8 @@ const setupAssociations = () => {
     //ASSOCIATION VET
     Vet.belongsTo(VetCenter, {
         foreignKey: 'vetCenterId',
-        as: 'vetCenter'
+        as: 'vetCenter',
+        onDelete: 'CASCADE',
     });
     VetCenter.hasMany(Vet, {
         foreignKey: 'vetCenterId',
@@ -200,7 +211,8 @@ const setupAssociations = () => {
     //ASSOCIATION OSTEO
     Osteo.belongsTo(OsteoCenter, {
         foreignKey: 'osteoCenterId',
-        as: 'osteoCenter'
+        as: 'osteoCenter',
+        onDelete: 'CASCADE',
     });
     OsteoCenter.hasMany(Osteo, {
         foreignKey: 'osteoCenterId',
@@ -253,7 +265,7 @@ const setupAssociations = () => {
     //ASSOCIATION RDV
     Appointment.belongsTo(Patient, {
         foreignKey: 'patientId',
-        as: 'patient'
+        as: 'patient',
     });
     Patient.hasMany(Appointment, {
         foreignKey: 'patientId',
@@ -261,7 +273,7 @@ const setupAssociations = () => {
     });
     Appointment.belongsTo(VetCenter, {
         foreignKey: 'vetCenterId',
-        as: 'vetCenter'
+        as: 'vetCenter',
     });
     VetCenter.hasMany(Appointment, {
         foreignKey: 'vetCenterId',
@@ -269,7 +281,7 @@ const setupAssociations = () => {
     });
     Appointment.belongsTo(OsteoCenter, {
         foreignKey: 'osteoCenterId',
-        as: 'osteoCenter'
+        as: 'osteoCenter',
     });
     OsteoCenter.hasMany(Appointment, {
         foreignKey: 'osteoCenterId',
@@ -303,7 +315,8 @@ const setupAssociations = () => {
     });
     WorkSchedule.belongsTo(Patient, {
         foreignKey: 'patientId',
-        as: 'patient'
+        as: 'patient',
+        onDelete: "CASCADE",
     });
     Patient.hasMany(WorkSchedule, {
         foreignKey: 'patientId',

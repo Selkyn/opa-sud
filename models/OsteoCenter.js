@@ -58,7 +58,7 @@ const OsteoCenter = sequelize.define('OsteoCenter', {
       }
   },
 }, {
-    timestamps: false
+    timestamps: true
   });
 
   module.exports = OsteoCenter;

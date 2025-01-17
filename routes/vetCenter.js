@@ -1,14 +1,23 @@
 const express = require('express');
 const router = express.Router();
-
+const { validate } = require('../middleware/validateMiddleware');
+const { sanitizeMiddleware } = require('../middleware/sanitizeMiddleware');
+const { vetCenterSchema } = require('../validators/vetCenterValidator');
 const vetCenterCtrl = require('../controllers/vetCenter');
 
 router.get('/', vetCenterCtrl.getVetCenters);
 // router.get('/form', vetCenterCtrl.createvetCentersForm);
-router.post('/add', vetCenterCtrl.addVetCenter);
+router.post('/add', 
+    validate(vetCenterSchema),
+    sanitizeMiddleware,
+    vetCenterCtrl.addVetCenter);
 router.get('/:id', vetCenterCtrl.vetCenterDetails);
 router.delete('/:id/delete', vetCenterCtrl.deleteVetCenter);
-router.put('/:id/edit', vetCenterCtrl.editVetCenter);
+router.put(
+    '/:id/edit',
+    validate(vetCenterSchema),
+    sanitizeMiddleware, 
+    vetCenterCtrl.editVetCenter);
 router.put('/:id/contact', vetCenterCtrl.updateVetCenterContact);
 
 

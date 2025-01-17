@@ -21,6 +21,7 @@ const ReasonAppointment = require('../models/ReasonAppointment');
 const StatusAppointment = require('../models/StatusAppointment');
 const WorkSchedule = require('../models/WorkSchedule');
 const Task = require('../models/Task');
+const PaymentStatus = require('../models/PaymentStatus');
 
 // Fonction pour capitaliser la première lettre de chaque mot
 const capitalizeFirstLetter = (str) => {
@@ -100,6 +101,11 @@ exports.getPatients = async (req, res) => {
                             attributes: ['name']
                         }
                     ]
+                },
+                {
+                    model: Race,
+                    as: 'race',
+                    attributes: ["name"]
                 },
                 // {
                 //     model: VetCenter,
@@ -187,6 +193,8 @@ exports.createPatientForm = async (req, res) => {
 
 exports.addPatient = async (req, res) => {
     console.log("Données reçues du formulaire :", req.body);
+
+    
     let {
         name,
         birthYear,
@@ -254,44 +262,6 @@ exports.addPatient = async (req, res) => {
             customAnimalType = capitalizeFirstLetter(customAnimalType);
         }
     
-        // if (nameVetCenter) {
-        //     nameVetCenter = capitalizeFirstLetter(nameVetCenter);
-        // }
-
-        // if (cityVetCenter) {
-        //     cityVetCenter = capitalizeFirstLetter(cityVetCenter);
-        // }
-
-        // if (departmentVetCenter) {
-        //     departmentVetCenter = capitalizeFirstLetter(departmentVetCenter);
-        // }
-        // if (nameOsteoCenter) {
-        //     nameOsteoCenter = capitalizeFirstLetter(nameOsteoCenter);
-        // }
-
-        // if (cityOsteoCenter) {
-        //     cityOsteoCenter = capitalizeFirstLetter(cityOsteoCenter);
-        // }
-
-        // if (departmentOsteoCenter) {
-        //     departmentOsteoCenter = capitalizeFirstLetter(departmentOsteoCenter);
-        // }
-
-        // if (firstnameVet) {
-        //     firstnameVet = capitalizeFirstLetter(firstnameVet);
-        // }
-
-        // if (lastnameVet) {
-        //     lastnameVet = capitalizeFirstLetter(lastnameVet);
-        // }
-
-        // if (emailVet) {
-        //     emailVet = capitalizeFirstLetter(emailVet);
-        // }
-
-        // if (phoneVet) {
-        //     phoneVet = capitalizeFirstLetter(phoneVet);
-        // }
 
     // Vérifier que 'vets' est un tableau, sinon l'initialiser à un tableau vide
     if (!Array.isArray(vets)) {
@@ -434,12 +404,14 @@ exports.addPatient = async (req, res) => {
                 const firstname = vet.firstname ? capitalizeFirstLetter(vet.firstname) : null;
                 const lastname = vet.lastname ? capitalizeFirstLetter(vet.lastname) : null;
                 const email = vet.email ? vet.email : null;
+                const phone = vet.phone ? vet.phone : null;
 
                 if (firstname && lastname) {
                     await Vet.create({
                         firstname,
                         lastname,
                         email,
+                        phone,
                         vetCenterId: vetCenter.id
                     });
                 }
@@ -476,12 +448,14 @@ exports.addPatient = async (req, res) => {
                 const firstname = osteo.firstname ? capitalizeFirstLetter(osteo.firstname) : null;
                 const lastname = osteo.lastname ? capitalizeFirstLetter(osteo.lastname) : null;
                 const email = osteo.email ? osteo.email : null;
+                const phone = osteo.phone ? osteo.phone : null;
 
                 if (firstname && lastname) {
                     await Osteo.create({
                         firstname,
                         lastname,
                         email,
+                        phone,
                         osteoCenterId: osteoCenter.id
                     });
                 }
@@ -576,6 +550,10 @@ exports.patientDetails = async (req, res) => {
                         {
                             model: PaymentMode,
                             as: 'paymentMode'
+                        },
+                        {
+                            model: PaymentStatus,
+                            as: 'paymentStatus'
                         }
                     ]
                 },
@@ -878,12 +856,14 @@ if (!animalTypeId && customAnimalType) {
                 const firstname = vet.firstname ? capitalizeFirstLetter(vet.firstname) : null;
                 const lastname = vet.lastname ? capitalizeFirstLetter(vet.lastname) : null;
                 const email = vet.email ? vet.email : null;
+                const phone = vet.phone ? vet.phone : null;
 
                 if (firstname && lastname) {
                     await Vet.create({
                         firstname,
                         lastname,
                         email,
+                        phone,
                         vetCenterId: vetCenter.id
                     });
                 }
@@ -924,12 +904,14 @@ if (!animalTypeId && customAnimalType) {
                 const firstname = osteo.firstname ? capitalizeFirstLetter(osteo.firstname) : null;
                 const lastname = osteo.lastname ? capitalizeFirstLetter(osteo.lastname) : null;
                 const email = osteo.email ? osteo.email : null;
+                const phone = osteo.phone ? osteo.phone : null;
 
                 if (firstname && lastname) {
                     await Osteo.create({
                         firstname,
                         lastname,
                         email,
+                        phone,
                         osteoCenterId: osteoCenter.id
                     });
                 }

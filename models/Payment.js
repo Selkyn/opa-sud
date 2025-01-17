@@ -2,6 +2,7 @@ const { DataTypes } = require('sequelize');
 const sequelize = require('../sequelize');
 const PaymentType = require('./PaymentType');
 const PaymentMode = require('./PaymentMode');
+const PaymentStatus = require('./PaymentStatus');
 
 const Payment = sequelize.define('Payment', {
     id: {
@@ -12,6 +13,14 @@ const Payment = sequelize.define('Payment', {
     date: {
         type: DataTypes.DATE,
         allowNull: true
+    },
+    endDate: { // Nouvelle colonne pour la date de fin
+        type: DataTypes.DATE,
+        allowNull: true,
+    },
+    amount: { 
+        type: DataTypes.FLOAT, 
+        allowNull: true, 
     },
     paymentTypeId: {
         type: DataTypes.INTEGER,
@@ -29,6 +38,14 @@ const Payment = sequelize.define('Payment', {
             key: 'id'       
         }
     },
+    paymentStatusId: {
+        type: DataTypes.INTEGER,
+        allowNull: true,
+        references: {
+            model: PaymentStatus, 
+            key: 'id'       
+        }
+    }
 }, {
     timestamps: false
   });

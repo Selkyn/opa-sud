@@ -58,7 +58,7 @@ const VetCenter = sequelize.define('VetCenter', {
       }
   },
 }, {
-    timestamps: false
+    timestamps: true
   });
 
   module.exports = VetCenter;

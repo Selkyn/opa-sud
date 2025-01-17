@@ -109,7 +109,21 @@ const Patient = sequelize.define('Patient', {
         }
     },
 }, {
-    timestamps: true
+    timestamps: true,
   });
+
+  Patient.addHook('afterDestroy', async (patient, options) => {
+    const Appointment = require('./Appointment'); // Import du modèle Appointment
+
+    try {
+        const deleted = await Appointment.destroy({
+            where: { patientId: patient.id },
+        });
+
+        console.log(`${deleted} appointments deleted for patient ${patient.id}.`);
+    } catch (error) {
+        console.error('Error deleting appointments for patient:', error);
+    }
+});
 
 module.exports = Patient;
