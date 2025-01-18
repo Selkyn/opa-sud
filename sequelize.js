@@ -7,4 +7,14 @@ const sequelize = new Sequelize(process.env.DB_NAME, process.env.DB_USERNAME, pr
   logging: false,
 });
 
+// const sequelize = new Sequelize(process.env.DATABASE_URL, {
+//   dialect: 'postgres',
+//   dialectOptions: {
+//       ssl: {
+//           require: true,
+//           rejectUnauthorized: false
+//       }
+//   }
+// });
+
 module.exports = sequelize;

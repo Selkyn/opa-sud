@@ -19,7 +19,7 @@ const VetCenter = sequelize.define('VetCenter', {
     },
     adress: {
         type: DataTypes.STRING,
-        allowNull: true
+        allowNull: false
     },
     city: {
         type: DataTypes.STRING,

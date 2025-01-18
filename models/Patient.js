@@ -34,7 +34,11 @@ const Patient = sequelize.define('Patient', {
     },
     pathology: {
         type: DataTypes.STRING,
-        allowNull: false
+        allowNull: true
+    },
+    infos : {
+        type: DataTypes.STRING,
+        allowNull: true
     },
     clientId: {
         type: DataTypes.INTEGER,

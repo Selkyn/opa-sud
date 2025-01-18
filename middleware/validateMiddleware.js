@@ -1,16 +1,23 @@
-const validate = (schema) => {
+const validate = (schema, source = "body") => {
     return async (req, res, next) => {
         try {
-            // Conversion explicite avant validation
-            if (req.body.postal && typeof req.body.postal !== 'string') {
-                req.body.postal = String(req.body.postal);
+            // Vérifie la source spécifiée (body, params, query)
+            const dataToValidate = req[source];
+
+            // Conversion explicite pour les cas spécifiques
+            if (source === "body" && dataToValidate?.postal && typeof dataToValidate.postal !== "string") {
+                dataToValidate.postal = String(dataToValidate.postal);
             }
+
             // Valider les données avec Joi
-            const validatedData = await schema.validateAsync(req.body, { convert: true });
-            req.body = validatedData; // Remplace req.body par les données validées
+            const validatedData = await schema.validateAsync(dataToValidate, { convert: true });
+
+            // Remplace la partie validée de la requête par les données validées
+            req[source] = validatedData;
+
             next();
         } catch (error) {
-            console.error(error.details[0].message)
+            console.error("Erreur de validation :", error.details[0].message);
             res.status(400).json({
                 message: "Validation échouée",
                 details: error.details.map((err) => err.message),
@@ -18,6 +25,5 @@ const validate = (schema) => {
         }
     };
 };
-
 
 module.exports = { validate };

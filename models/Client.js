@@ -23,7 +23,7 @@ const Client = sequelize.define('Client', {
     },
     adress: {
         type: DataTypes.STRING,
-        allowNull: true
+        allowNull: false
     },
     city: {
         type: DataTypes.STRING,
@@ -31,7 +31,7 @@ const Client = sequelize.define('Client', {
     },
       department: {
         type: DataTypes.STRING,
-        allowNull: false
+        allowNull: true
       },
       postal: {
         type: DataTypes.INTEGER,

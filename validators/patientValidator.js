@@ -57,6 +57,7 @@ const addPatientSchema = Joi.object({
     .try(Joi.number(), Joi.string().pattern(/^\d+$/), Joi.allow(null))
     .optional(),
     pathology: Joi.string().optional().allow(null, ''),
+    infos: Joi.string().optional().allow(null, ''),
     limbs: Joi.array().items(Joi.number()).optional(), // Liste des IDs des membres
     customAnimalType: Joi.string().optional().allow(null, ''), // Ajouter ici
     customRace: Joi.string().optional().allow(null, ''),
