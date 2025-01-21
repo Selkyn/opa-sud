@@ -77,8 +77,10 @@ exports.login = async (req, res, next) => {
       res.cookie("jwt", token, {
         httpOnly: true,
         // secure: process.env.NODE_ENV === "production",
-        secure: req.hostname !== "localhost",
-        sameSite: "strict",
+        // secure: req.hostname !== "localhost",
+        secure: true,
+        // sameSite: "strict",
+        sameSite: "none",
         maxAge: 3600000, // 1 heure
       });
 
