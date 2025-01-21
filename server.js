@@ -1,10 +1,11 @@
 const express = require('express');
 const app = require('./app');
 const sequelize = require('./sequelize'); // Connexion à la base de données
+require('dotenv').config();
 const setupAssociations = require('./models/association'); // Importer les associations
 
 
-const port = 4000;
+const port = process.env.PORT || 4000;
 
 (async () => {
     try {
