@@ -78,7 +78,7 @@ exports.login = async (req, res, next) => {
         httpOnly: true,
         // secure: process.env.NODE_ENV === "production",
         secure: req.hostname !== "localhost",
-        sameSite: "strict",
+        sameSite: "lax",
         maxAge: 3600000, // 1 heure
       });
 
@@ -95,7 +95,7 @@ exports.logout = (req, res) => {
     httpOnly: true,
     // secure: process.env.NODE_ENV === "production",
     secure: req.hostname !== "localhost",
-    sameSite: "strict",
+    sameSite: "lax",
   });
   res.status(200).json({ message: "Déconnexion réussie" });
 };
