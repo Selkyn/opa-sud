@@ -11,8 +11,15 @@ require('dotenv').config();
 const app = express();
 
 // Configuration CORS
+// const corsOptions = {
+//     origin: process.env.URL_FRONT,
+//     credentials: true,
+// };
+
 const corsOptions = {
-    origin: process.env.URL_FRONT,
+    origin: process.env.NODE_ENV === 'production'
+        ? process.env.URL_FRONT // Frontend en production
+        : 'http://localhost:3000', // Frontend en développement
     credentials: true,
 };
 app.use(cors(corsOptions));
