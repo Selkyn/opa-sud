@@ -63,7 +63,6 @@ exports.login = async (req, res, next) => {
       process.env.JWT_SECRET,
       { expiresIn: "1h" }
     );
-    console.log("Token généré :", token);
     // Vérifie si le client est mobile ou web
     const isMobile = req.headers["user-agent"]
       ?.toLowerCase()

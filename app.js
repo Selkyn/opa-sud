@@ -1,13 +1,68 @@
 const express = require('express');
 const cors = require('cors');
-// const session = require('express-session');
-const passport = require('passport');
 const cookieParser = require('cookie-parser');
-require('./config/passport')(passport);
+const xss = require('xss-clean');
+const csrf = require('csurf');
+const hpp = require('hpp');
+const helmet = require('helmet');
+const compression = require('compression');
 require('dotenv').config();
+
 const app = express();
 
-//ROUTES
+// Configuration CORS
+const corsOptions = {
+    origin: process.env.URL_FRONT,
+    credentials: true,
+};
+app.use(cors(corsOptions));
+
+// Middlewares
+app.use(cookieParser());
+app.use(express.json({ limit: '100kb' }));
+app.use(express.urlencoded({ extended: true, limit: '100kb' }));
+app.use(xss()); // Protection contre XSS
+
+// Helmet pour sécuriser les en-têtes HTTP
+app.use(helmet());
+
+// HPP pour éviter les attaques de pollution des paramètres HTTP
+app.use(hpp());
+
+app.use(compression()); // Compression des réponses HTTP
+
+// Middleware CSRF
+const csrfProtection = csrf({ cookie: true });
+
+// Route pour récupérer le token CSRF
+app.get("/csrf-token", csrfProtection, (req, res) => {
+    try {
+        const token = req.csrfToken(); // Fonction disponible ici
+        res.json({ csrfToken: token });
+    } catch (error) {
+        res.status(500).json({ message: "Erreur interne lors de la génération du token CSRF." });
+    }
+});
+
+// Exclusion des routes spécifiques pour CSRF
+const excludedPaths = ["/auth/login", "/csrf-token"];
+app.use((req, res, next) => {
+    if (excludedPaths.includes(req.path)) {
+        return next();
+    }
+    csrfProtection(req, res, next);
+});
+
+// Rate Limiting
+const rateLimit = require('express-rate-limit');
+const limiter = rateLimit({
+    windowMs: 15 * 60 * 1000, // 15 minutes
+    max: 200,
+    message: "Trop de requêtes, veuillez réessayer plus tard.",
+});
+app.use(limiter);
+
+// Import des routes
 const loginRoute = require('./routes/login');
 const patientRoute = require('./routes/patient');
 const vetCenterRoute = require('./routes/vetCenter');
@@ -20,20 +75,39 @@ const clientRoute = require('./routes/client');
 const contactRoute = require('./routes/contact');
 const appointmentRoute = require('./routes/appointment');
 const workScheduleRoute = require('./routes/workschedule');
-const test = require('./routes/sex')
+const test = require('./routes/sex');
 
-// app.set('view engine', 'ejs');
-const corsOptions = {
-    origin: 'http://localhost:3000', // Autorise uniquement le frontend
-    credentials: true, // Permet l'envoi des cookies et des headers d'authentification
-};
+// Routes
+app.use('/auth', loginRoute); // Route sans protection CSRF
+app.use('/patients', csrfProtection, patientRoute); // Routes protégées
+app.use('/vet-centers', csrfProtection, vetCenterRoute);
+app.use('/osteo-centers', csrfProtection, osteoCenterRoute);
+app.use('/paymentTypes', csrfProtection, paymentTypeRoute);
+app.use('/paymentModes', csrfProtection, paymentModeRoute);
+app.use('/paymentStatus', csrfProtection, paymentStatusRoute);
+app.use('/payment', csrfProtection, paymentRoute);
+app.use('/clients', csrfProtection, clientRoute);
+app.use('/contacts', csrfProtection, contactRoute);
+app.use('/appointments', csrfProtection, appointmentRoute);
+app.use('/work-schedules', csrfProtection, workScheduleRoute);
+app.use('/test', csrfProtection, test);
 
-// app.use(cors());
-app.use(cors(corsOptions));
-app.use(cookieParser());
-app.use(express.json());
-app.use(express.urlencoded({ extended: true })); 
-app.use(passport.initialize());
+// Gestion des erreurs
+app.use((err, req, res, next) => {
+    if (process.env.NODE_ENV === 'production') {
+        console.error('Erreur :', err.message); // Log interne sans exposer à l'utilisateur
+        return res.status(500).json({ message: 'Erreur interne.' });
+    } else {
+        // En mode développement, afficher des détails pour aider au débogage
+        return res.status(500).json({
+            message: err.message,
+            stack: err.stack, // Affiche la pile d'erreurs pour aider au débogage
+        });
+    }
+});
+
+module.exports = app;
+
 
 // app.use(session({
 //     secret: 'RANDOM_TOKEN_SECRET',
@@ -57,21 +131,3 @@ app.use(passport.initialize());
 // app.get('/patients/add', (req, res) => {
 //     res.render('add');
 // })
-
-
-//ROUTES USE 
-app.use('/auth', loginRoute);
-app.use('/patients', patientRoute);
-app.use('/vet-centers', vetCenterRoute);
-app.use('/osteo-centers', osteoCenterRoute);
-app.use('/paymentTypes', paymentTypeRoute);
-app.use('/paymentModes', paymentModeRoute);
-app.use('/paymentStatus', paymentStatusRoute);
-app.use('/payment', paymentRoute);
-app.use('/clients', clientRoute);
-app.use('/contacts', contactRoute);
-app.use('/appointments', appointmentRoute);
-app.use('/work-schedules', workScheduleRoute);
-app.use('/test', test)
-
-module.exports = app;

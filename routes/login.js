@@ -4,12 +4,21 @@ const { validate } = require("../middleware/validateMiddleware");
 const { sanitizeMiddleware } = require("../middleware/sanitizeMiddleware");
 const { loginSchema } = require("../validators/loginValidator");
 const { authToken } = require('../middleware/authToken');
+const rateLimit = require("express-rate-limit");
 // const passport = require("passport");
 
 const loginCtrl = require("../controllers/login");
 
+// Limitation des tentatives de login
+const loginLimiter = rateLimit({
+  windowMs: 15 * 60 * 1000, // 15 minutes
+  max: 10, // Limite à 10 tentatives par fenêtre
+  message: "Trop de tentatives de connexion. Réessayez plus tard.",
+});
+
 router.post(
   "/login",
+  loginLimiter,
   validate(loginSchema),
   sanitizeMiddleware,
   loginCtrl.login
