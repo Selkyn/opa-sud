@@ -60,7 +60,7 @@ app.get("/api/csrf-token", csrfProtection, (req, res) => {
 });
 
 // Exclusion des routes spécifiques pour CSRF
-const excludedPaths = ["/api/auth/login", "/api/csrf-token"];
+const excludedPaths = ["/api/auth/login","/api/auth/signup", "/api/csrf-token"];
 app.use((req, res, next) => {
     if (excludedPaths.includes(req.path)) {
         return next();

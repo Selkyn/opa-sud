@@ -76,7 +76,8 @@ exports.login = async (req, res, next) => {
       // Envoyer le token dans un cookie sécurisé pour le frontend web
       res.cookie("jwt", token, {
         httpOnly: true,
-        secure: process.env.NODE_ENV === "production",
+        // secure: process.env.NODE_ENV === "production",
+        secure: req.hostname !== "localhost",
         sameSite: "strict",
         maxAge: 3600000, // 1 heure
       });
@@ -92,7 +93,8 @@ exports.login = async (req, res, next) => {
 exports.logout = (req, res) => {
   res.clearCookie("jwt", {
     httpOnly: true,
-    secure: process.env.NODE_ENV === "production",
+    // secure: process.env.NODE_ENV === "production",
+    secure: req.hostname !== "localhost",
     sameSite: "strict",
   });
   res.status(200).json({ message: "Déconnexion réussie" });
