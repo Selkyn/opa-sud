@@ -8,7 +8,7 @@ const { deleteSchema } = require("../validators/deleteValidator");
 const patientCtrl = require("../controllers/patientController");
 const { authToken } = require('../middleware/authToken');
 
-router.use(authToken);
+// router.use(authToken);
 
 router.get("/", patientCtrl.getPatients);
 router.get("/status", patientCtrl.getStatus);
