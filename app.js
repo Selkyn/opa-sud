@@ -16,11 +16,19 @@ const app = express();
 //     credentials: true,
 // };
 
+// const corsOptions = {
+//     origin: process.env.NODE_ENV === 'production'
+//         ? process.env.URL_FRONT // Frontend en production
+//         : 'http://localhost:3000', // Frontend en développement
+//     credentials: true,
+// };
+
 const corsOptions = {
-    origin: process.env.NODE_ENV === 'production'
-        ? process.env.URL_FRONT // Frontend en production
-        : 'http://localhost:3000', // Frontend en développement
-    credentials: true,
+    origin: [
+        'http://localhost:3000', // Frontend local
+        'https://opa-sud-frontend.vercel.app' // Frontend en production
+    ],
+    credentials: true, // Autorise l'envoi des cookies
 };
 app.use(cors(corsOptions));
 
