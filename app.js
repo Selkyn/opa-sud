@@ -69,13 +69,13 @@ app.use((req, res, next) => {
 });
 
 // Rate Limiting
-const rateLimit = require('express-rate-limit');
-const limiter = rateLimit({
-    windowMs: 15 * 60 * 1000, // 15 minutes
-    max: 200,
-    message: "Trop de requêtes, veuillez réessayer plus tard.",
-});
-app.use(limiter);
+// const rateLimit = require('express-rate-limit');
+// const limiter = rateLimit({
+//     windowMs: 15 * 60 * 1000, // 15 minutes
+//     max: 200,
+//     message: "Trop de requêtes, veuillez réessayer plus tard.",
+// });
+// app.use(limiter);
 
 // Import des routes
 const loginRoute = require('./routes/login');
