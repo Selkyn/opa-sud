@@ -14,8 +14,8 @@ router.post(
   sanitizeMiddleware,
   loginCtrl.login
 );
-router.post("/register", loginCtrl.signup);
-router.post("/logout", loginCtrl.logout);
+// router.post("/register", loginCtrl.signup);
+router.post("/logout", authToken, loginCtrl.logout);
 // Route protégée pour vérifier l'authentification
 
 router.get("/check", authToken, (req, res) => {

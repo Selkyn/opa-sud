@@ -6,8 +6,11 @@ const { vetCenterSchema } = require("../validators/vetCenterValidator");
 const { deleteSchema } = require("../validators/deleteValidator");
 
 const { updateContactSchema } = require("../validators/updateContactValidator");
+const { authToken } = require('../middleware/authToken');
 
 const vetCenterCtrl = require("../controllers/vetCenter");
+
+router.use(authToken);
 
 router.get("/", vetCenterCtrl.getVetCenters);
 // router.get('/form', vetCenterCtrl.createvetCentersForm);

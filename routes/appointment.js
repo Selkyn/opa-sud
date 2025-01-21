@@ -5,7 +5,9 @@ const { sanitizeMiddleware } = require("../middleware/sanitizeMiddleware");
 const { appointmentSchema } = require("../validators/appointmentValidator");
 const { deleteSchema } = require("../validators/deleteValidator");
 const appointmentCtrl = require("../controllers/appointmenController");
+const { authToken } = require('../middleware/authToken');
 
+router.use(authToken);
 router.get("/", appointmentCtrl.getAppointments);
 router.post(
   "/add",

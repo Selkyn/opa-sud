@@ -4,8 +4,11 @@ const { validate } = require("../middleware/validateMiddleware");
 const { sanitizeMiddleware } = require("../middleware/sanitizeMiddleware");
 const { workScheduleSchema } = require("../validators/workScheduleValidator");
 const { deleteSchema } = require("../validators/deleteValidator");
+const { authToken } = require('../middleware/authToken');
 
 const workScheduleCtrl = require("../controllers/workScheduleController");
+
+router.use(authToken);
 
 router.get("/", workScheduleCtrl.getWorkSchedules);
 router.get("/tasks", workScheduleCtrl.getTask);

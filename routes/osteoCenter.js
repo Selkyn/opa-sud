@@ -6,6 +6,9 @@ const { osteoCenterSchema } = require("../validators/osteoCenterValidator");
 const { updateContactSchema } = require("../validators/updateContactValidator");
 const { deleteSchema } = require("../validators/deleteValidator");
 const osteoCenterCtrl = require("../controllers/osteoCenter");
+const { authToken } = require('../middleware/authToken');
+
+router.use(authToken);
 
 router.get("/", osteoCenterCtrl.getOsteoCenters);
 router.post(

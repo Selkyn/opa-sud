@@ -4,6 +4,9 @@ const { validate } = require("../middleware/validateMiddleware");
 const { sanitizeMiddleware } = require("../middleware/sanitizeMiddleware");
 const { paymentSchema } = require("../validators/paymentValidator");
 const payment = require('../controllers/paymentController');
+const { authToken } = require('../middleware/authToken');
+
+router.use(authToken);
 
 router.put('/:id/edit', 
     validate(paymentSchema),
