@@ -10,15 +10,15 @@ const rateLimit = require("express-rate-limit");
 const loginCtrl = require("../controllers/login");
 
 // Limitation des tentatives de login
-const loginLimiter = rateLimit({
-  windowMs: 15 * 60 * 1000, // 15 minutes
-  max: 10, // Limite à 10 tentatives par fenêtre
-  message: "Trop de tentatives de connexion. Réessayez plus tard.",
-});
+// const loginLimiter = rateLimit({
+//   windowMs: 15 * 60 * 1000, // 15 minutes
+//   max: 10, // Limite à 10 tentatives par fenêtre
+//   message: "Trop de tentatives de connexion. Réessayez plus tard.",
+// });
 
 router.post(
   "/login",
-  loginLimiter,
+  // loginLimiter,
   validate(loginSchema),
   sanitizeMiddleware,
   loginCtrl.login
