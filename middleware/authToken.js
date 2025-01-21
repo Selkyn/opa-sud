@@ -17,16 +17,19 @@
 const jwt = require("jsonwebtoken");
 
 exports.authToken = (req, res, next) => {
-    const token = req.cookies.jwt || req.headers.authorization?.split(" ")[1]; // Token depuis cookie ou en-tête
-    if (!token) {
+  const token = req.cookies.jwt || req.headers.authorization?.split(" ")[1];
+  if (!token) {
+      console.log("Token manquant");
       return res.status(401).json({ isAuthenticated: false, message: "Accès non autorisé" });
-    }
-  
-    try {
-      const decoded = jwt.verify(token, process.env.JWT_SECRET); // Vérifie le token
-      req.user = decoded; // Ajoute les infos utilisateur à la requête
-      next(); // Passe au middleware suivant ou au contrôleur
-    } catch (err) {
+  }
+
+  try {
+      const decoded = jwt.verify(token, process.env.JWT_SECRET);
+      console.log("Token valide : ", decoded); // Facultatif
+      req.user = decoded;
+      next();
+  } catch (err) {
+      console.error("Erreur de vérification du token : ", err.message); // Facultatif
       res.status(403).json({ isAuthenticated: false, message: "Token invalide ou expiré" });
-    }
-  };
+  }
+};
