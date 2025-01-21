@@ -47,26 +47,26 @@ app.use(hpp());
 app.use(compression()); // Compression des réponses HTTP
 
 // Middleware CSRF
-const csrfProtection = csrf({ cookie: true });
+// const csrfProtection = csrf({ cookie: true });
 
-// Route pour récupérer le token CSRF
-app.get("/api/csrf-token", csrfProtection, (req, res) => {
-    try {
-        const token = req.csrfToken(); // Fonction disponible ici
-        res.json({ csrfToken: token });
-    } catch (error) {
-        res.status(500).json({ message: "Erreur interne lors de la génération du token CSRF." });
-    }
-});
+// // Route pour récupérer le token CSRF
+// app.get("/api/csrf-token", csrfProtection, (req, res) => {
+//     try {
+//         const token = req.csrfToken(); // Fonction disponible ici
+//         res.json({ csrfToken: token });
+//     } catch (error) {
+//         res.status(500).json({ message: "Erreur interne lors de la génération du token CSRF." });
+//     }
+// });
 
-// Exclusion des routes spécifiques pour CSRF
-const excludedPaths = ["/api/auth/login","/api/auth/signup", "/api/csrf-token"];
-app.use((req, res, next) => {
-    if (excludedPaths.includes(req.path)) {
-        return next();
-    }
-    csrfProtection(req, res, next);
-});
+// // Exclusion des routes spécifiques pour CSRF
+// const excludedPaths = ["/api/auth/login","/api/auth/signup", "/api/csrf-token"];
+// app.use((req, res, next) => {
+//     if (excludedPaths.includes(req.path)) {
+//         return next();
+//     }
+//     csrfProtection(req, res, next);
+// });
 
 // Rate Limiting
 // const rateLimit = require('express-rate-limit');
@@ -94,17 +94,17 @@ const workScheduleRoute = require('./routes/workschedule');
 
 // Routes
 app.use('/api/auth', loginRoute); // Route sans protection CSRF
-app.use('/api/patients', csrfProtection, patientRoute); // Routes protégées
-app.use('/api/vet-centers', csrfProtection, vetCenterRoute);
-app.use('/api/osteo-centers', csrfProtection, osteoCenterRoute);
-app.use('/api/paymentTypes', csrfProtection, paymentTypeRoute);
-app.use('/api/paymentModes', csrfProtection, paymentModeRoute);
-app.use('/api/paymentStatus', csrfProtection, paymentStatusRoute);
-app.use('/api/payment', csrfProtection, paymentRoute);
-app.use('/api/clients', csrfProtection, clientRoute);
-app.use('/api/contacts', csrfProtection, contactRoute);
-app.use('/api/appointments', csrfProtection, appointmentRoute);
-app.use('/api/work-schedules', csrfProtection, workScheduleRoute);
+app.use('/api/patients', patientRoute); // Routes protégées
+app.use('/api/vet-centers', vetCenterRoute);
+app.use('/api/osteo-centers', osteoCenterRoute);
+app.use('/api/paymentTypes', paymentTypeRoute);
+app.use('/api/paymentModes', paymentModeRoute);
+app.use('/api/paymentStatus', paymentStatusRoute);
+app.use('/api/payment', paymentRoute);
+app.use('/api/clients', clientRoute);
+app.use('/api/contacts', contactRoute);
+app.use('/api/appointments', appointmentRoute);
+app.use('/api/work-schedules', workScheduleRoute);
 // app.use('api/test', csrfProtection, test);
 
 module.exports = app;
