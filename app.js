@@ -16,13 +16,20 @@ const app = express();
 //     credentials: true,
 // };
 
+// const corsOptions = {
+//     origin: process.env.NODE_ENV === 'production'
+//         ? process.env.URL_FRONT // Frontend en production
+//         : 'http://localhost:3000', // Frontend en développement
+//     credentials: true,
+// };
+
+// app.use(cors(corsOptions));
 const corsOptions = {
-    origin: process.env.NODE_ENV === 'production'
-        ? process.env.URL_FRONT // Frontend en production
-        : 'http://localhost:3000', // Frontend en développement
+    origin: '*',
     credentials: true,
 };
 
+app.use(cors(corsOptions));
 // const corsOptions = {
 //     origin: [
 //         'http://localhost:3000', // Frontend local
@@ -30,7 +37,7 @@ const corsOptions = {
 //     ],
 //     credentials: true, // Autorise l'envoi des cookies
 // };
-app.use(cors(corsOptions));
+
 
 // Middlewares
 app.use(cookieParser());
