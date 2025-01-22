@@ -70,7 +70,7 @@ const csrfProtection = csrf({
     cookie: {
       httpOnly: true,
       secure: true,
-      sameSite:'Lax'
+      sameSite: 'None',
     },
   });
 
