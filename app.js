@@ -54,16 +54,16 @@ app.use(hpp());
 app.use(compression()); // Compression des réponses HTTP
 
 // Middleware CSRF
-const csrfProtection = csrf({ cookie: true });
+// const csrfProtection = csrf({ cookie: true });
 
 // Middleware CSRF
-// const csrfProtection = csrf({
-//     cookie: {
-//       httpOnly: true,
-//       secure: true,
-//       sameSite: "none",
-//     },
-//   });
+const csrfProtection = csrf({
+    cookie: {
+      httpOnly: true,
+      secure: true,
+      sameSite: "none",
+    },
+  });
 
 // Route pour récupérer le token CSRF
 app.get("/api/csrf-token", csrfProtection, (req, res) => {
