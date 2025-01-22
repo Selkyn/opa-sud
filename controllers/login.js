@@ -104,5 +104,10 @@ exports.logout = (req, res) => {
     // secure: req.hostname !== "localhost",
     // sameSite: "strict",
   });
+  res.clearCookie('_csrf', {
+    httpOnly: true,
+    secure: true,
+    sameSite: 'None',
+});
   res.status(200).json({ message: "Déconnexion réussie" });
 };
