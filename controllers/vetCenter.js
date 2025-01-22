@@ -96,19 +96,6 @@ exports.vetCenterDetails = async (req, res) => {
     }
 }
 
-
-// exports.createvetCentersForm = async (req, res) => {
-//     try {
-//         const sexes = await Sex.findAll();
-//         console.log(sexes)
-//         res.status(200).json(sexes);
-        
-//     } catch (error) {
-//         console.error("Erreur lors de la récupération des sexes");
-//         res.status(500).json({ message: "Erreur lors de la récupération des sexes" });
-//     }
-// }
-
 exports.addVetCenter = async (req, res) => {
     
     try {
@@ -170,7 +157,6 @@ exports.addVetCenter = async (req, res) => {
 
             // Vérifier que les informations minimales du vétérinaire sont présentes
             if (firstname && lastname) {
-                console.log("Ajout du vétérinaire :", firstname, lastname, email, phone);
                 await Vet.create({
                     firstname,
                     lastname,
@@ -180,7 +166,7 @@ exports.addVetCenter = async (req, res) => {
                     vetCenterId: newVetCenter.id
                 });
             } else {
-                console.log("Données vétérinaires manquantes, pas d'ajout :", vet);
+                console.error("Données vétérinaires manquantes, pas d'ajout :", vet);
             }
         }
 

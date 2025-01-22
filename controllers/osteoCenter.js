@@ -129,7 +129,6 @@ exports.addOsteoCenter = async (req, res) => {
         );
         const { lat, lng } = osteoGeocodeResponse.data.results[0].geometry;
         if (!lat || !lng) {
-            console.log("erreur d adresse")
             return res.status(400).json({ error: "Adresse invalide ou introuvable." });
         }
 
@@ -166,7 +165,7 @@ exports.addOsteoCenter = async (req, res) => {
                     osteoCenterId: newOsteoCenter.id
                 });
             } else {
-                console.log("Données de l'ostéopathe manquantes, pas d'ajout :", osteo);
+                console.error("Données de l'ostéopathe manquantes, pas d'ajout :", osteo);
             }
         }
 

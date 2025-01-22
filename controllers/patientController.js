@@ -134,7 +134,6 @@ exports.getPatients = async (req, res) => {
 exports.createPatientForm = async (req, res) => {
     try {
         const sexes = await Sex.findAll();
-        console.log(sexes)
         const animalTypes = await AnimalType.findAll({
             include: [
                 {
@@ -192,9 +191,6 @@ exports.createPatientForm = async (req, res) => {
 }
 
 exports.addPatient = async (req, res) => {
-    console.log("Données reçues du formulaire :", req.body);
-
-    
     let {
         name,
         birthYear,
@@ -277,48 +273,38 @@ exports.addPatient = async (req, res) => {
     const vetFullAddress =`${adressVetCenter}, ${postalVetCenter} ${cityVetCenter}`;
     
     try {
-
-        // console.log("Données reçues :", req.body);
-
         // Vérifier que le sexe existe
         const selectedSex = await Sex.findByPk(sexId);
         if (!selectedSex) {
             return res.status(400).json({ error: 'Sexe non trouvé' });
         }
-        console.log("Sexe sélectionné :", selectedSex);
 
         let selectedAnimalType = null;
         let selectedRace = null;
         
         // Si "Autre" est sélectionné pour le type d'animal ou un type personnalisé est fourni
         if (!animalTypeId && customAnimalType) {
-            console.log("Création d'un type d'animal personnalisé:", customAnimalType);
         
             // Vérifier si le type d'animal personnalisé existe déjà
             selectedAnimalType = await AnimalType.findOne({ where: { name: customAnimalType.trim() } });
         
             // Si le type d'animal n'existe pas, le créer
             if (!selectedAnimalType) {
-                console.log("Le type d'animal n'existe pas, création...");
                 selectedAnimalType = await AnimalType.create({ name: customAnimalType.trim() });
             }
         
-            console.log("Type d'animal personnalisé créé ou trouvé :", selectedAnimalType);
         
             // Gérer la race personnalisée
             if (customRace) {
-                console.log("Création d'une race personnalisée:", customRace);
                 selectedRace = await Race.findOne({
                     where: { name: customRace.trim(), animalTypeId: selectedAnimalType.id }
                 });
                 if (!selectedRace) {
                     selectedRace = await Race.create({ name: customRace.trim(), animalTypeId: selectedAnimalType.id });
                 }
-                console.log("Race personnalisée créée ou trouvée :", selectedRace);
             }
         } else if (animalTypeId) {
             // Si un type d'animal existant est sélectionné
-            console.log("Sélection d'un type d'animal existant:", animalTypeId);
             selectedAnimalType = await AnimalType.findByPk(animalTypeId);
         
             if (!selectedAnimalType) {
@@ -328,7 +314,6 @@ exports.addPatient = async (req, res) => {
         
             // Gérer la race (existante ou personnalisée)
             if (customRace) {
-                console.log("Création d'une race personnalisée pour un type existant:", customRace);
                 selectedRace = await Race.findOne({
                     where: { name: customRace.trim(), animalTypeId: selectedAnimalType.id }
                 });
@@ -338,9 +323,7 @@ exports.addPatient = async (req, res) => {
                         animalTypeId: selectedAnimalType.id
                     });
                 }
-                console.log("Race personnalisée créée ou trouvée :", selectedRace);
             } else if (raceId) {
-                console.log("Sélection d'une race existante:", raceId);
                 selectedRace = await Race.findOne({
                     where: { id: raceId, animalTypeId: selectedAnimalType.id }
                 });
@@ -348,7 +331,6 @@ exports.addPatient = async (req, res) => {
                     console.error("Race non trouvée pour ce type d'animal :", raceId);
                     return res.status(400).json({ error: 'Race non trouvée pour ce type d\'animal' });
                 }
-                console.log("Race existante trouvée :", selectedRace);
             }
         }
         
@@ -358,7 +340,6 @@ exports.addPatient = async (req, res) => {
         let client = await Client.findOne({ where: { email } });
         if (!client) {
             const { lat, lng } = await makeCoord(adress, postal, city);
-            console.log("Création d'un nouveau client:", firstname, lastname);
             client = await Client.create({
                 firstname,
                 lastname,
@@ -373,7 +354,6 @@ exports.addPatient = async (req, res) => {
                 sexId: clientSexId
             });
         }
-        console.log("Client trouvé ou créé:", client);
 
         // Gestion du centre vétérinaire
         let vetCenter = null;
@@ -469,7 +449,6 @@ exports.addPatient = async (req, res) => {
         })
 
         // Créer le patient
-        console.log("Création du patient...");
         const patient = await Patient.create({
             name,
             birthYear,
@@ -485,7 +464,6 @@ exports.addPatient = async (req, res) => {
             statusId : 1,
             paymentId : defaultPayment.id
         });
-        console.log("Patient créé avec succès :", patient);
 
         if (limbs && limbs.length > 0) {
             const foundLimbs = await Limb.findAll({
@@ -616,7 +594,6 @@ exports.patientDetails = async (req, res) => {
                 }
             ]
         });
-        console.log(patient)
         res.status(200).json(patient);
     } catch (error) {
         console.error("Erreur lors de la récupération des détails du patient :", error);
@@ -695,7 +672,6 @@ exports.editPatient = async (req, res) => {
         const fullAddress = `${adress}, ${postal} ${city}`;
         const vetFullAddress = `${adressVetCenter}, ${postalVetCenter} ${cityVetCenter}`;
 
-        console.log("Données reçues pour édition :", req.body);
 
         // Trouver le patient existant
         const patient = await Patient.findByPk(patientId, {
@@ -751,7 +727,6 @@ exports.editPatient = async (req, res) => {
 // Gérer le type d'animal
 if (!animalTypeId && customAnimalType) {
     // Si "Autre" est sélectionné pour le type d'animal
-    console.log("Modification d'un type d'animal personnalisé:", customAnimalType);
 
     // Trouver ou créer le type d'animal personnalisé
     const [animalType] = await AnimalType.findOrCreate({
@@ -759,21 +734,16 @@ if (!animalTypeId && customAnimalType) {
     });
     selectedAnimalType = animalType;
 
-    console.log("Type d'animal personnalisé trouvé ou créé :", selectedAnimalType);
 
     // Gérer la race personnalisée si fournie
     if (customRace) {
-        console.log("Modification d'une race personnalisée:", customRace);
         const [race] = await Race.findOrCreate({
             where: { name: customRace.trim(), animalTypeId: selectedAnimalType.id }
         });
         selectedRace = race;
-
-        console.log("Race personnalisée trouvée ou créée :", selectedRace);
     }
 } else if (animalTypeId) {
     // Si un type d'animal existant est sélectionné
-    console.log("Modification pour un type d'animal existant:", animalTypeId);
 
     selectedAnimalType = await AnimalType.findByPk(animalTypeId);
     if (!selectedAnimalType) {
@@ -781,20 +751,14 @@ if (!animalTypeId && customAnimalType) {
         return res.status(400).json({ error: 'Type d\'animal non trouvé' });
     }
 
-    console.log("Type d'animal existant trouvé :", selectedAnimalType);
-
     // Gérer la race (existante ou personnalisée)
     if (customRace) {
-        console.log("Modification d'une race personnalisée pour un type existant:", customRace);
         const [race] = await Race.findOrCreate({
             where: { name: customRace.trim(), animalTypeId: selectedAnimalType.id }
         });
         selectedRace = race;
 
-        console.log("Race personnalisée trouvée ou créée :", selectedRace);
     } else if (raceId) {
-        console.log("Modification pour une race existante:", raceId);
-
         selectedRace = await Race.findOne({
             where: { id: raceId, animalTypeId: selectedAnimalType.id }
         });
@@ -802,8 +766,6 @@ if (!animalTypeId && customAnimalType) {
             console.error("Race non trouvée pour ce type d'animal :", raceId);
             return res.status(400).json({ error: 'Race non trouvée pour ce type d\'animal' });
         }
-
-        console.log("Race existante trouvée :", selectedRace);
     }
 }
 
@@ -934,7 +896,6 @@ if (!animalTypeId && customAnimalType) {
             osteoCenterId: osteoCenter ? osteoCenter.id : patient.osteoCenterId
         });
 
-        console.log("Patient mis à jour avec succès :", patient);
         res.status(200).json({ message: 'Patient mis à jour avec succès' });
     } catch (error) {
         console.error('Erreur lors de la mise à jour du patient :', error);

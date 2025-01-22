@@ -76,7 +76,6 @@ exports.getAppointments = async (req, res) => {
                 
                 
         });
-        console.log("Données formatées des rendez-vous :", formattedAppointments);
         res.status(200).json(formattedAppointments);
     } catch (error) {
         console.error("Erreur lors de la récupération des RDV :", error);
@@ -193,7 +192,6 @@ exports.editAppointments = async (req, res) => {
 exports.getStatusAppointments = async ( req, res ) => {
     try {
         const statusAppointments = await StatusAppointment.findAll();
-        console.log(statusAppointments)
         res.status(200).json(statusAppointments);
     } catch (error) {
         console.error("Erreur lors de la récupération des status de RDV :", error);
@@ -204,7 +202,6 @@ exports.getStatusAppointments = async ( req, res ) => {
 exports.getReasonAppointments = async ( req, res ) => {
     try {
         const reasonAppointments = await ReasonAppointment.findAll();
-        console.log(reasonAppointments)
         res.status(200).json(reasonAppointments);
     } catch (error) {
         console.error("Erreur lors de la récupération des raisons de RDV :", error);

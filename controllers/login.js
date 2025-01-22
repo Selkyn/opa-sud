@@ -76,11 +76,12 @@ exports.login = async (req, res, next) => {
       // Envoyer le token dans un cookie sécurisé pour le frontend web
       res.cookie("jwt", token, {
         httpOnly: true,
-        // secure: process.env.NODE_ENV === "production",
+        secure: process.env.NODE_ENV === "production",
         // secure: req.hostname !== "localhost",
-        secure: true,
+        // secure: true,
         // sameSite: "strict",
-        sameSite: "none",
+        sameSite: process.env.SAME_SITE,
+        // sameSite: "none",
         maxAge: 3600000, // 1 heure
       });
 
@@ -101,49 +102,3 @@ exports.logout = (req, res) => {
   });
   res.status(200).json({ message: "Déconnexion réussie" });
 };
-
-
-
-// exports.logout = (req, res) => {
-//   // req.logout();
-//   if (req.session) {
-//     req.session.destroy(function (err) {
-//       res.redirect("/");
-//     });
-//   } else {
-//     res.redirect("/");
-//   }
-// };
-// exports.login = async (req, res, next) => {
-//     try {
-//         const { email, password } = req.body;
-
-//         const user = await User.findOne({
-//             where: { email },
-//             include: {
-//                 model: Role,
-//                 as: 'role'
-//             }
-//         });
-
-//         console.log(user);
-//         if (!user) {
-//             return res.status(401).render('index', { error: 'Invalid email or password' });
-//         }
-
-//         const validPassword = await bcrypt.compare(password, user.password);
-//         if (!validPassword) {
-//             return res.status(401).render('index', { error: 'Invalid email or password' });
-//         }
-
-//         // Assuming index is successful and you want to redirect to a dashboard
-//         // Optionally, you could also store the user session here
-//         req.session.userId = user.id;
-//         console.log(req.session.userId)
-//         // res.redirect('/dashboard'); // Or you can render another page
-
-//     } catch (error) {
-//         console.error('Error during index:', error);
-//         res.status(500).render('index', { error: 'Server error, please try again later' });
-//     }
-// };

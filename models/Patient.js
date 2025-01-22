@@ -124,7 +124,6 @@ const Patient = sequelize.define('Patient', {
             where: { patientId: patient.id },
         });
 
-        console.log(`${deleted} appointments deleted for patient ${patient.id}.`);
     } catch (error) {
         console.error('Error deleting appointments for patient:', error);
     }
