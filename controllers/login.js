@@ -76,7 +76,7 @@ exports.login = async (req, res, next) => {
       // Envoyer le token dans un cookie sécurisé pour le frontend web
       res.cookie("jwt", token, {
         httpOnly: true,
-        secure: process.env.NODE_ENV === "production",
+        secure: process.env.NODE_ENV,
         // secure: req.hostname !== "localhost",
         // secure: true,
         // sameSite: "strict",
