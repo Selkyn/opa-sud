@@ -80,7 +80,7 @@ exports.login = async (req, res, next) => {
         // secure: req.hostname !== "localhost",
         secure: true,
         // sameSite: "strict",
-        sameSite: process.env.SAME_SITE,
+        // sameSite: process.env.SAME_SITE,
         sameSite: "none",
         maxAge: 3600000, // 1 heure
       });
