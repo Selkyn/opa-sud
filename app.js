@@ -10,11 +10,7 @@ require('dotenv').config();
 
 const app = express();
 
-app.use((req, res, next) => {
-    console.log('Header CSRF-Token reçu :', req.headers['csrf-token']);
-    console.log('Cookie _csrf reçu :', req.cookies['_csrf']);
-    next();
-});
+
 
 
 // Configuration CORS
@@ -59,6 +55,12 @@ app.use(helmet());
 app.use(hpp());
 
 app.use(compression()); // Compression des réponses HTTP
+
+app.use((req, res, next) => {
+    console.log('Header CSRF-Token reçu :', req.headers['csrf-token']);
+    console.log('Cookie _csrf reçu :', req.cookies['_csrf']);
+    next();
+});
 
 // Middleware CSRF
 // const csrfProtection = csrf({ cookie: true });
