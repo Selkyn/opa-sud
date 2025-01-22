@@ -16,20 +16,20 @@ const app = express();
 //     credentials: true,
 // };
 
+// const corsOptions = {
+//     origin: process.env.NODE_ENV === 'production'
+//         ? process.env.URL_FRONT // Frontend en production
+//         : 'http://localhost:3000', // Frontend en développement
+//     credentials: true,
+// };
+
+app.use(cors(corsOptions));
 const corsOptions = {
-    origin: process.env.NODE_ENV === 'production'
-        ? process.env.URL_FRONT // Frontend en production
-        : 'http://localhost:3000', // Frontend en développement
+    origin: 'https://opa-sud-pannel-admin.vercel.app',
     credentials: true,
 };
 
 app.use(cors(corsOptions));
-// const corsOptions = {
-//     origin: 'https://opa-sud-pannel-admin.vercel.app',
-//     credentials: true,
-// };
-
-// app.use(cors(corsOptions));
 // const corsOptions = {
 //     origin: [
 //         'http://localhost:3000', // Frontend local
