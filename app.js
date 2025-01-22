@@ -23,7 +23,7 @@ const app = express();
 //     credentials: true,
 // };
 
-app.use(cors(corsOptions));
+// app.use(cors(corsOptions));
 const corsOptions = {
     origin: 'https://opa-sud-pannel-admin.vercel.app',
     credentials: true,
