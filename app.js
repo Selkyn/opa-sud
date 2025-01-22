@@ -61,7 +61,7 @@ const csrfProtection = csrf({
     cookie: {
       httpOnly: true,
       secure: true,
-      sameSite: 'none',
+      sameSite: 'None',
     },
   });
 
