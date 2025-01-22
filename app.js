@@ -10,6 +10,13 @@ require('dotenv').config();
 
 const app = express();
 
+app.use((req, res, next) => {
+    console.log('Header CSRF-Token reçu :', req.headers['csrf-token']);
+    console.log('Cookie _csrf reçu :', req.cookies['_csrf']);
+    next();
+});
+
+
 // Configuration CORS
 // const corsOptions = {
 //     origin: process.env.URL_FRONT,
