@@ -26,21 +26,29 @@ const app = express();
 //     credentials: true,
 // };
 
-// app.use(cors(corsOptions));
+
+//PROD
 const corsOptions = {
-    origin: 'https://opa-sud-pannel-admin.vercel.app',
-    credentials: true,
+    origin: [
+        'https://opa-sud-pannel-admin.vercel.app', // Panel admin
+        'null', // Pour les applications mobiles sans origine
+    ],
+    credentials: true, // Si le backend utilise des cookies ou sessions
 };
 
 app.use(cors(corsOptions));
+
+
+//DEV
 // const corsOptions = {
 //     origin: [
 //         'http://localhost:3000', // Frontend local
-//         'https://opa-sud-frontend.vercel.app' // Frontend en production
+//         'https://opa-sud-frontend.vercel.app', // Frontend en production
+//         'http://192.168.1.79:8081',
 //     ],
 //     credentials: true, // Autorise l'envoi des cookies
 // };
-
+// app.use(cors(corsOptions));
 
 // Middlewares
 app.use(cookieParser());
@@ -56,23 +64,26 @@ app.use(hpp());
 
 app.use(compression()); // Compression des réponses HTTP
 
-app.use((req, res, next) => {
-    console.log('Header CSRF-Token reçu :', req.headers['csrf-token']);
-    console.log('Cookie _csrf reçu :', req.cookies['_csrf']);
-    next();
-});
+// app.use((req, res, next) => {
+//     console.log('Header CSRF-Token reçu :', req.headers['csrf-token']);
+//     console.log('Cookie _csrf reçu :', req.cookies['_csrf']);
+//     next();
+// });
 
+//DEV
 // Middleware CSRF
-// const csrfProtection = csrf({ cookie: true });
+const csrfProtection = csrf({ cookie: true });
 
+
+//PROD
 // Middleware CSRF
-const csrfProtection = csrf({
-    cookie: {
-      httpOnly: true,
-      secure: true,
-      sameSite: 'None',
-    },
-  });
+// const csrfProtection = csrf({
+//     cookie: {
+//       httpOnly: true,
+//       secure: true,
+//       sameSite: 'None',
+//     },
+//   });
 
 // Route pour récupérer le token CSRF
 app.get("/api/csrf-token", csrfProtection, (req, res) => {
@@ -85,9 +96,10 @@ app.get("/api/csrf-token", csrfProtection, (req, res) => {
 });
 
 // Exclusion des routes spécifiques pour CSRF
-const excludedPaths = ["/api/auth/login","/api/auth/logout", "/api/check", "/api/csrf-token"];
+const excludedPaths = ["/api/auth/login","/api/auth/logout", "/api/csrf-token"];
 app.use((req, res, next) => {
-    if (excludedPaths.includes(req.path)) {
+    const isMobile = req.headers["x-client-type"] === "mobile";
+    if (excludedPaths.includes(req.path) || isMobile) {
         return next();
     }
     csrfProtection(req, res, next);

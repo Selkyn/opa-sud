@@ -33,6 +33,7 @@ exports.signup = async (req, res) => {
 
 exports.login = async (req, res, next) => {
   try {
+    // console.log("En-têtes reçus :", req.headers);
     const user = await User.findOne({
       where: { email: req.body.email },
       include: [
@@ -64,14 +65,29 @@ exports.login = async (req, res, next) => {
       { expiresIn: "1h" }
     );
     // Vérifie si le client est mobile ou web
-    const isMobile = req.headers["user-agent"]
-      ?.toLowerCase()
-      .includes("mobile");
-
+    // const isMobile = req.headers["user-agent"]
+    //   ?.toLowerCase()
+    //   .includes("mobile");
+        // Vérification si la requête est mobile
+        const isMobile = req.headers["x-client-type"] === "mobile";
+        // console.log("Token généré :", token);
     // Configurer le cookie avec des options sécurisées
     if (isMobile) {
+      // console.log("Requête mobile détectée");
       // Envoyer le token dans l'en-tête pour les mobiles
-      return res.json({ token: `Bearer ${token}` });
+      // return res.json({ token: `Bearer ${token}` });
+            // Génération d'un refresh token pour les mobiles
+            const refreshToken = jwt.sign(
+              { userId: user.id },
+              process.env.REFRESH_SECRET,
+              { expiresIn: "7d" }
+            );
+      
+            // console.log("Requête mobile détectée, refresh token généré");
+            return res.json({
+              token: `Bearer ${token}`,
+              refreshToken, // Retourne le refresh token uniquement pour les mobiles
+            });
     } else {
       // Envoyer le token dans un cookie sécurisé pour le frontend web
       res.cookie("jwt", token, {
@@ -92,6 +108,31 @@ exports.login = async (req, res, next) => {
     res.status(500).json({ message: "Erreur serveur" });
   }
 };
+
+exports.refreshToken = (req, res) => {
+  const { refreshToken } = req.body;
+
+  if (!refreshToken) {
+    return res.status(401).json({ message: "Refresh token manquant" });
+  }
+
+  try {
+    // Vérifie le refresh token
+    const decoded = jwt.verify(refreshToken, process.env.REFRESH_SECRET);
+
+    // Génère un nouveau access token
+    const accessToken = jwt.sign(
+      { userId: decoded.userId },
+      process.env.JWT_SECRET,
+      { expiresIn: "15m" }
+    );
+
+    res.json({ accessToken });
+  } catch (err) {
+    res.status(403).json({ message: "Refresh token invalide ou expiré" });
+  }
+};
+
 
 exports.logout = (req, res) => {
   res.clearCookie("jwt", {

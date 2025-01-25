@@ -18,6 +18,8 @@ const jwt = require("jsonwebtoken");
 
 exports.authToken = (req, res, next) => {
     const token = req.cookies.jwt || req.headers.authorization?.split(" ")[1]; // Token depuis cookie ou en-tête
+//     console.log("Authorization reçu :", req.headers.authorization);
+// console.log("Token extrait :", token);
     if (!token) {
       return res.status(401).json({ isAuthenticated: false, message: "Accès non autorisé" });
     }

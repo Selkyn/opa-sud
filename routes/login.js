@@ -34,6 +34,8 @@ router.get("/check", authToken, (req, res) => {
     });
   });
 
+  router.post("/refreshToken", loginCtrl.refreshToken)
+
 module.exports = router;
 
 
